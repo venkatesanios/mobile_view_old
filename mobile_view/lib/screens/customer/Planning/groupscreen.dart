@@ -216,7 +216,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                     length: _groupedName.data!.group!.length ?? 0,
                     child: Scaffold(
                       backgroundColor: Color(0xffE6EDF5),
-                      appBar: AppBar(title: Text('Groups'),),
+                      appBar: AppBar(title: Text('Groups'),automaticallyImplyLeading: false,),
                       body: Padding(
                         padding: const EdgeInsets.only(
                             left: 8, bottom: 10, right: 8, top: 8),
@@ -354,21 +354,23 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                   _groupedName.data!.group![groupSelect.selectedGroupsrno]
                       .valve = List.empty();
                   var group = _groupedName.data!.toJson();
+                  String mqttSendData =
+                  toMqttFormat(_groupedName.data!.group);
+                  Map<String, dynamic> payLoadFinal = {
+                    "1300": [
+                      {"1301": mqttSendData},
+                    ]
+                  };
                   Map<String, Object> body = {
                     "userId": overAllPvd.userId,
                     "controllerId": overAllPvd.controllerId,
                     "group": group['group'],
+                    "hardware":payLoadFinal,
                     "createUser": overAllPvd.userId
                   };
 
                   setState(() async {
-                    String mqttSendData =
-                    toMqttFormat(_groupedName.data!.group);
-                    Map<String, dynamic> payLoadFinal = {
-                      "1300": [
-                        {"1301": mqttSendData},
-                      ]
-                    };
+
 
                     if (MQTTManager().isConnected == true) {
                       await validatePayloadSent(

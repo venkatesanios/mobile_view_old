@@ -373,6 +373,10 @@ class _ConditionUIState extends State<ConditionUI>
       conditionselectionstr = '$usedProgramDropDownStr is $value';
       zoneStr = name;
     }
+    if (usedProgramDropDownStr.contains('Sensor')) {
+      conditionselectionstr = '$name $id is $value';
+      programStr = id;
+    }
     print('conditionselectionstr $conditionselectionstr');
     return conditionselectionstr;
   }
@@ -393,7 +397,7 @@ class _ConditionUIState extends State<ConditionUI>
     return Scaffold(
       backgroundColor: Color(0xffE6EDF5),
       appBar: AppBar(
-        title: Text('Conditions Library'),
+        title: Text('Conditions Library'),automaticallyImplyLeading: false,
       ),
       body: buildcodition(context),
       floatingActionButton: FloatingActionButton(
@@ -515,7 +519,7 @@ class _ConditionUIState extends State<ConditionUI>
             width: 300,
             child: const Center(
                 child: Text(
-                  'This Condition Not Found ',
+                  "There are no conditions found",
                   style: TextStyle(color: Colors.black, fontSize: 20),
                   textAlign: TextAlign.center,
                 )),
@@ -1730,10 +1734,16 @@ class _ConditionUIState extends State<ConditionUI>
       "level": levelJson
     };
     String Mqttsenddata = toMqttFormat(conditionLibrary);
+    Map<String, dynamic> payLoadFinal = {
+      "1000": [
+        {"1001": Mqttsenddata},
+      ]
+    };
     Map<String, Object> body = {
       "userId": overAllPvd.userId,
       "controllerId": overAllPvd.controllerId,
       "condition": finaljson,
+      "hardware": payLoadFinal,
       "createUser": overAllPvd.userId
     };
     // final response = await HttpService()
@@ -1742,11 +1752,7 @@ class _ConditionUIState extends State<ConditionUI>
     // GlobalSnackBar.show(
     //     context, jsonDataresponse['message'], response.statusCode);
 
-    Map<String, dynamic> payLoadFinal = {
-      "1000": [
-        {"1001": Mqttsenddata},
-      ]
-    };
+
     if (MQTTManager().isConnected == true) {
       await validatePayloadSent(
           dialogContext: context,

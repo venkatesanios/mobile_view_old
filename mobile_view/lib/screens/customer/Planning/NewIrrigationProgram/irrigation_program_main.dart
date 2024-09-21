@@ -554,12 +554,13 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
         "delayBetweenZones": mainProvider.programDetails!.delayBetweenZones,
         "adjustPercentage": mainProvider.programDetails!.adjustPercentage,
         "incompleteRestart": mainProvider.isCompletionEnabled ? "1" : "0",
-        "controllerReadStatus": mainProvider.programDetails!.controllerReadStatus,
+        "controllerReadStatus": 0,
         "programType": mainProvider.selectedProgramType,
         "hardware": dataToMqtt
       };
       userData.addAll(dataToSend);
-      // print(dataToMqtt);
+      // print(dataToMqtt['2500'][1]['2502'].split(',').join('\n'));
+      // print(dataToMqtt['2500'][1]['2502'].split(',').length);
       try {
         // MQTTManager().publish(jsonEncode(dataToMqtt), "AppToFirmware/${widget.deviceId}");
         await validatePayloadSent(

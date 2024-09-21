@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:mobile_view/screens/config/constant/pump_in_constant.dart';
 import 'package:provider/provider.dart';
+import '../../../ListOfFertilizerInSet.dart';
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
 import '../../../widget/drop_down_button.dart';
@@ -40,12 +41,11 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     return Container(
-      color: const Color(0xfff3f3f3),
       padding: const EdgeInsets.all(8.0),
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         var width = 0.0;
-        if(constraints.maxWidth > defaultSize * 8){
-          width = defaultSize * 8;
+        if(constraints.maxWidth > defaultSize * 9){
+          width = defaultSize * 9;
         }else{
           width = constraints.maxWidth;
         }
@@ -59,7 +59,7 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
                     //Todo : first column
                     Container(
                       decoration: const BoxDecoration(
-                          color: Color(0xff96CED5),
+                        color: Color(0xff96CED5),
                       ),
                       padding: const EdgeInsets.only(left: 8),
                       width: defaultSize,
@@ -79,7 +79,7 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
                                     Container(
                                       margin: const EdgeInsets.only(bottom: 1),
                                       decoration: const BoxDecoration(
-                                        color: Colors.white
+                                          color: Colors.white
                                       ),
                                       padding: const EdgeInsets.only(left: 8),
                                       width: defaultSize,
@@ -117,6 +117,7 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
                             getCell(width: 120, title: 'Base'),
                             getCell(width: 120, title: 'Minimum'),
                             getCell(width: 120, title: 'Maximum'),
+                            getCell(width: 120, title: 'valve'),
                           ],
                         ),
                       ),
@@ -144,7 +145,7 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
                                           children: [
                                             Container(
                                               decoration: const BoxDecoration(
-                                             ),
+                                              ),
                                               child: Row(
                                                 children: [
                                                   Container(
@@ -196,6 +197,20 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
                                                     height: 50,
                                                     child: getYourWidgetMoistureSensor(context: context, index: i, type: 1, initialValue: constantPvd.moistureSensorUpdated[i]['maximum'], route: 'maximum',regex: regexForDecimal),
                                                   ),
+                                                  InkWell(
+                                                    onTap: (){
+                                                      sideSheet(constraints, i);
+                                                    },
+                                                    child: Container(
+                                                      margin: const EdgeInsets.only(left: 1,right: 1,bottom: 1),
+                                                      color: Colors.white,
+                                                      width: 120,
+                                                      height: 50,
+                                                      child : Center(
+                                                        child: Text('${constantPvd.moistureSensorUpdated[i]['valve']}',overflow: TextOverflow.ellipsis,),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -219,6 +234,40 @@ class _MoistureSensorInConstState extends State<MoistureSensorInConst> {
       }),
     );
   }
+  void sideSheet(constraints,int index,) {
+    showGeneralDialog(
+      barrierLabel: "Side sheet",
+      barrierDismissible: true,
+      // barrierColor: const Color(0xff6600),
+      transitionDuration: const Duration(milliseconds: 300),
+      context: context,
+      pageBuilder: (context, animation1, animation2) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Material(
+            elevation: 15,
+            color: Colors.transparent,
+            borderRadius: BorderRadius.zero,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter stateSetter) {
+                return SizedBox(
+                  width: constraints.maxWidth < 600 ? constraints.maxWidth * 0.7 : constraints.maxWidth * 0.2,
+                  child: SelectingValveForMoistureSensor(index: index),
+                );
+              },
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation1, animation2, child) {
+        return SlideTransition(
+          position: Tween(begin: const Offset(1, 0), end: const Offset(0, 0)).animate(animation1),
+          child: child,
+        );
+      },
+    );
+  }
+
 }
 
 
@@ -281,4 +330,91 @@ Widget getYourWidgetMoistureSensor({
     return Center(child: Text(initialValue));
   }
 
+}
+
+class SelectingValveForMoistureSensor extends StatefulWidget {
+  final int index;
+  const SelectingValveForMoistureSensor({super.key, required this.index});
+
+  @override
+  State<SelectingValveForMoistureSensor> createState() => _SelectingValveForMoistureSensorState();
+}
+
+class _SelectingValveForMoistureSensorState extends State<SelectingValveForMoistureSensor> {
+  List<dynamic> valveList = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    var constantPvd = Provider.of<ConstantProvider>(context,listen: false);
+    for(var l in constantPvd.valveUpdated){
+      if(constantPvd.moistureSensorUpdated[widget.index]['location'] == l['id']){
+        for(var v in l['valve']){
+          valveList.add({
+            'name' : v['name'],
+            'id' : v['id'],
+            'hid' : v['hid'],
+            'isSelect' : constantPvd.moistureSensorUpdated[widget.index]['valve'].contains(v['id']) ? true : false,
+          });
+        }
+      }
+    }
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    var constantPvd = Provider.of<ConstantProvider>(context, listen: true);
+    return Scaffold(
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: customBoxShadow
+        ),
+        height: 60,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            MaterialButton(
+              onPressed: (){
+                Navigator.pop(context);
+              },
+              color: Colors.red,
+              child: const Text("Cancel",style: TextStyle(color: Colors.white),),
+            ),
+            MaterialButton(
+              onPressed: (){
+                var selectedValve = valveList.where((element)=> element['isSelect'] == true)
+                    .toList().map((e) => e['id']).toList().join('_');
+                constantPvd.moistureSensorFunctionality(['valve',widget.index,selectedValve]);
+                Navigator.pop(context);
+              },
+              color: Theme.of(context).primaryColor,
+              child: const Text("OK",style: TextStyle(color: Colors.white)),
+            )
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 50,
+            ),
+            for(var valve in valveList)
+              ListTile(
+                title: Text('${valve['name']}',style: const TextStyle(fontSize: 12),),
+                trailing: Checkbox(
+                  value: valve['isSelect'],
+                  onChanged: (value) {
+                    setState(() {
+                      valve['isSelect'] = !valve['isSelect'];
+                    });
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

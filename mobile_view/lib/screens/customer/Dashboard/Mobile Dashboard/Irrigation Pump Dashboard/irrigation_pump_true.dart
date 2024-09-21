@@ -55,7 +55,7 @@ class _IrrigationPumpDashBoardTrueState extends State<IrrigationPumpDashBoardTru
   @override
   void dispose() {
     _controller.dispose();
-    print('irrigation pump true disposing...');
+    // print('irrigation pump true disposing...');
     // TODO: implement dispose
     super.dispose();
 

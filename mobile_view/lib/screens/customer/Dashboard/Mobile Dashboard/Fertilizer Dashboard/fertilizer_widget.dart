@@ -105,7 +105,7 @@ class _FertilizerWidgetState extends State<FertilizerWidget> {
                 bottom: 30,
                 left: 15,
                 child: SizedBox(
-                  width: 40,
+                    width: 40,
                     child: Text('${site[widget.siteIndex]['FertilizerTankSelector'][0]['Name']}',style: TextStyle(fontSize: 10,fontWeight: FontWeight.bold),)
                 )
             ),
@@ -153,7 +153,7 @@ class _FertilizerWidgetState extends State<FertilizerWidget> {
                           width: MediaQuery.of(context).size.width,
                           height: 8,
                           child: horizontalPipeLeftFlow(count: 11, mode: getWaterPipeStatus(context,selectedLine: widget.selectedLine) != 0 ? (![0,3].contains(booster['Status']) ? 1 : 0) : 0, controller: widget.controller)
-                          // child: Image.asset('assets/images/animated_horizontal_water_pipe.gif')
+                        // child: Image.asset('assets/images/animated_horizontal_water_pipe.gif')
                       ),
                     ),
                     Row(
@@ -171,7 +171,10 @@ class _FertilizerWidgetState extends State<FertilizerWidget> {
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text('${channelList[i]['SW_Name'] ?? channelList[i]['Name']}'),
+                                          SizedBox(
+                                            child: Text('${channelList[i]['SW_Name'] ?? channelList[i]['Name']}',style: TextStyle(overflow: TextOverflow.ellipsis),),
+                                            width: MediaQuery.of(context).size.width * 0.4,
+                                          ),
                                           IconButton(
                                               onPressed: (){
                                                 Navigator.pop(context);
@@ -231,12 +234,12 @@ class _FertilizerWidgetState extends State<FertilizerWidget> {
                               ),
                               Positioned(
                                 bottom: 4,
-                                  child: Container(
+                                child: Container(
                                     padding: EdgeInsets.all(2),
                                     width: (50 * getTextScaleFactor(context)).toDouble(),
                                     color: primaryColorDark,
-                                      child: Text('${channelList[i]['FlowRate_LpH']} L/H',style: TextStyle(fontSize: 8,fontWeight: FontWeight.bold,color: Colors.white),)
-                                  ),
+                                    child: Text('${channelList[i]['FlowRate_LpH']} L/H',style: TextStyle(fontSize: 8,fontWeight: FontWeight.bold,color: Colors.white),)
+                                ),
                               )
                             ],
                           ),

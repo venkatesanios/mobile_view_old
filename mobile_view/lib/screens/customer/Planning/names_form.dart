@@ -98,7 +98,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Names"),
+        title: Text("Names"),automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -157,6 +157,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs> {
                             "userId": widget.customerID,
                             "controllerId": widget.controllerId,
                             "userNameList": nameListJson,
+                            "hardware": jsonDecode(Mqttsenddata),
                             "createUser": widget.userID
                           };
 

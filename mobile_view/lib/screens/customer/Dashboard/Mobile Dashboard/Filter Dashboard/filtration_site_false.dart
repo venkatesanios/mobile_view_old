@@ -11,7 +11,6 @@ class FiltrationSiteFalse extends StatefulWidget {
   final int siteIndex;
   final int selectedLine;
   const FiltrationSiteFalse({super.key, required this.siteIndex, required this.centralOrLocal, required this.selectedLine});
-
   @override
   State<FiltrationSiteFalse> createState() => _FiltrationSiteFalseState();
 }
@@ -40,7 +39,7 @@ class _FiltrationSiteFalseState extends State<FiltrationSiteFalse> with SingleTi
   @override
   void dispose() {
     _controller.dispose();
-    print('filter site false dispose');
+    // print('filter site false dispose');
     // TODO: implement dispose
     super.dispose();
   }
@@ -155,37 +154,38 @@ class _FiltrationSiteFalseState extends State<FiltrationSiteFalse> with SingleTi
                             ),
                           ),
                         ),
-
-                        Positioned(
-                          top: 0,
-                          left: 10,
-                          child: Container(
-                            width: 150,
-                            height: (20 * getTextScaleFactor(context)).toDouble(),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: Color(0xff3A96D2)
-                            ),
-                            child: Center(
-                                child: Text('Pressure In : ${site[widget.siteIndex]['PrsIn']}',style: TextStyle(color: Colors.white,fontSize: 12),)
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 10,
-                          child: Container(
-                            width: 150,
-                            height: (20 * getTextScaleFactor(context)).toDouble(),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: Color(0xff3A96D2)
-                            ),
-                            child: Center(
-                                child: Text('Pressure Out : ${site[widget.siteIndex]['PrsOut']}',style: TextStyle(color: Colors.white,fontSize: 12),)
+                        if(site[widget.siteIndex]['PrsIn'] != '-')
+                          Positioned(
+                            top: 0,
+                            left: 10,
+                            child: Container(
+                              width: 150,
+                              height: (20 * getTextScaleFactor(context)).toDouble(),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Color(0xff3A96D2)
+                              ),
+                              child: Center(
+                                  child: Text('Pressure In : ${site[widget.siteIndex]['PrsIn']}',style: TextStyle(color: Colors.white,fontSize: 12),)
+                              ),
                             ),
                           ),
-                        ) ,
+                        if(site[widget.siteIndex]['PrsOut'] != '-')
+                          Positioned(
+                            bottom: 0,
+                            left: 10,
+                            child: Container(
+                              width: 150,
+                              height: (20 * getTextScaleFactor(context)).toDouble(),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Color(0xff3A96D2)
+                              ),
+                              child: Center(
+                                  child: Text('Pressure Out : ${site[widget.siteIndex]['PrsOut']}',style: TextStyle(color: Colors.white,fontSize: 12),)
+                              ),
+                            ),
+                          ) ,
                       ],
                     ),
                   ),

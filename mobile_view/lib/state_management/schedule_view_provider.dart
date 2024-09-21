@@ -364,7 +364,7 @@ class ScheduleViewProvider extends ChangeNotifier {
     programList = [];
 
     await requestScheduleData(deviceId);
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 8));
 
     if (!scheduleGotFromMqtt) {
       await getUserSequencePriority(userId, controllerId, messageFromHttp);

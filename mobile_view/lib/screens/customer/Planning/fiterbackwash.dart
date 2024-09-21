@@ -102,7 +102,7 @@ class _FilterBackwashUI1State extends State<FilterBackwashUI1>
             length: _filterbackwash.data!.length ?? 0,
             child: Scaffold(
               backgroundColor: Color(0xffE6EDF5),
-              appBar: AppBar(title: Text('Filter BackWash'),),
+              appBar: AppBar(title: Text('Filter BackWash'),automaticallyImplyLeading: false,),
               body: SizedBox(
                 child: Column(
                   children: [
@@ -986,21 +986,21 @@ class _FilterBackwashUI1State extends State<FilterBackwashUI1>
 
     List<Map<String, dynamic>> filterBackWash =
     _filterbackwash.data!.map((condition) => condition.toJson()).toList();
-    Map<String, Object> body = {
-      "userId": overAllPvd.userId,
-      "controllerId": overAllPvd.controllerId,
-      "filterBackwash": filterBackWash,
-      "createUser": overAllPvd.userId
-    };
     String mqttSendData = toMqttFormat(_filterbackwash.data);
-    final response = await HttpService()
-        .postRequest("createUserPlanningFilterBackwashing", body);
-    final jsonDataResponse = json.decode(response.body);
-    Map<String, dynamic> payLoadFinal = {
+
+     Map<String, dynamic> payLoadFinal = {
       "900": [
         {"901": mqttSendData},
       ]
     };
+    Map<String, Object> body = {
+      "userId": overAllPvd.userId,
+      "controllerId": overAllPvd.controllerId,
+      "filterBackwash": filterBackWash,
+      "hardware":payLoadFinal,
+      "createUser": overAllPvd.userId
+    };
+
     if (MQTTManager().isConnected == true) {
       await validatePayloadSent(
           dialogContext: context,

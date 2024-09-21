@@ -363,7 +363,7 @@ class _GetPumpAlertBoxState extends State<GetPumpAlertBox> {
                                 children: [
                                   for(var index = 0; index < 3; index++)
                                     buildContainer(
-                                      title: ["Rv", "Yv", "Bv"][index],
+                                      title: ["RY", "YB", "BR"][index],
                                       value:payloadProvider.sourcePump[widget.index]['Voltage'].split(',')[index],
                                       color1: [
                                         Colors.redAccent.shade100,
@@ -438,7 +438,7 @@ class _GetPumpAlertBoxState extends State<GetPumpAlertBox> {
                                       Padding(
                                         padding: const EdgeInsets.symmetric(vertical: 5),
                                         child: Text('${payloadProvider.sourcePump[widget.index]['Level'][0]['SW_Name'] ?? payloadProvider.sourcePump[widget.index]['Level'][0]['Name']} '
-                                            '\n ${payloadProvider.sourcePump[widget.index]['Level'][0]['Value']}'),
+                                            '\n ${payloadProvider.sourcePump[widget.index]['Level'][0]['Value']} Feet'),
                                       ),
                                       Container(
                                         width: MediaQuery.of(context).size.width * 0.2,
@@ -458,7 +458,7 @@ class _GetPumpAlertBoxState extends State<GetPumpAlertBox> {
                                           ],
                                         ),
                                         child: WaveViewInAlert(
-                                          percentageValue: double.parse(payloadProvider.sourcePump[widget.index]['Level'][0]['Value']),
+                                          percentageValue: payloadProvider.sourcePump[widget.index]['Level'][0]['LevelPercent'].toDouble(),
                                         ),
                                       ),
                                     ],
@@ -470,10 +470,11 @@ class _GetPumpAlertBoxState extends State<GetPumpAlertBox> {
                                 children: [
                                   Text('Reason',style: TextStyle(fontWeight: FontWeight.bold),),
                                   SizedBox(height: 3,),
-                                  Text('${pumpAlarmMessage[payloadProvider.sourcePump[widget.index]['OnOffReason']]}\n '
-                                      '( set = ${payloadProvider.sourcePump[widget.index]['SetValue']} ,'
-                                      ' Actual = ${payloadProvider.sourcePump[widget.index]['SetValue']} '
-                                      '${pumpAlarmMessage[payloadProvider.sourcePump[widget.index]['OnOffReason']].contains('voltage') ? ', Phase = ${payloadProvider.sourcePump[widget.index]['SetValue']}' : ''})',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
+                                  Text('${pumpAlarmMessage[payloadProvider.sourcePump[widget.index]['OnOffReason']]}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
+                                  if(payloadProvider.sourcePump[widget.index]['OnOffReason'] != null && ['3','4','5','8','9','10'].contains(payloadProvider.sourcePump[widget.index]['OnOffReason']))
+                                    Text('( set = ${payloadProvider.sourcePump[widget.index]['SetValue']} ,'
+                                        ' Actual = ${payloadProvider.sourcePump[widget.index]['ActualValue']} '
+                                        '${pumpAlarmMessage[payloadProvider.sourcePump[widget.index]['OnOffReason']].contains('voltage') ? ', Phase = ${payloadProvider.sourcePump[widget.index]['Phase']}' : ''})',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
                                   if(['7','8','9','10'].contains(payloadProvider.sourcePump[widget.index]['OnOffReason']))
                                     MaterialButton(
                                       color: Colors.red,
@@ -527,7 +528,6 @@ class _GetPumpAlertBoxState extends State<GetPumpAlertBox> {
                                     });
                                     for(var i = 0;i < 8;i++){
                                       await Future.delayed(Duration(seconds: 1));
-                                      print('loading : ${payloadProvider.sourcePump[widget.index]['${on}loading']}');
                                       if(i == 7){
                                         setState(() {
                                           payloadProvider.sourcePump[widget.index].remove('${on}loading');
@@ -619,7 +619,7 @@ class _GetPumpAlertBoxState extends State<GetPumpAlertBox> {
                         alignment: Alignment.bottomCenter,
                         child: Container(
                           width: 10,
-                          height: 30*(double.parse(payloadProvider.sourcePump[widget.index]['Level'][0]['Value'])/100),
+                          height: 30 * (payloadProvider.sourcePump[widget.index]['Level'][0]['LevelPercent']/100) as double,
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               color: Colors.blue.shade300
@@ -706,7 +706,7 @@ Widget getIrrigationPump({required String pumpName,required data,required String
                               children: [
                                 for(var index = 0; index < 3; index++)
                                   buildContainer(
-                                    title: ["Rv", "Yv", "Bv"][index],
+                                    title: ["RY", "YB", "BR"][index],
                                     value:data['Voltage'].split(',')[index],
                                     color1: [
                                       Colors.redAccent.shade100,
@@ -775,8 +775,12 @@ Widget getIrrigationPump({required String pumpName,required data,required String
                                 SizedBox(height: 3,),
                                 Text('${pumpAlarmMessage[data['OnOffReason']]}\n '
                                     '( set = ${data['SetValue']} ,'
-                                    ' Actual = ${data['SetValue']} '
-                                    '${pumpAlarmMessage[data['OnOffReason']].contains('voltage') ? ', Phase = ${data['SetValue']}' : ''})',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
+                                    ' Actual = ${data['ActualValue']} '
+                                    '${pumpAlarmMessage[data['OnOffReason']].contains('voltage') ? ', Phase = ${data['Phase']}' : ''})',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
+                                if(data['OnOffReason'] != null && ['3','4','5','8','9','10'].contains(data['OnOffReason']))
+                                  Text('( set = ${data['SetValue']} ,'
+                                      ' Actual = ${data['ActualValue']} '
+                                      '${pumpAlarmMessage[data['OnOffReason']].contains('voltage') ? ', Phase = ${data['Phase']}' : ''})',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
                                 resetButton
                               ],
                             ),
@@ -933,9 +937,9 @@ dynamic currentColor = {
 };
 
 dynamic currentName = {
-  '1' : 'Rc',
-  '2' : 'Yc',
-  '3' : 'Bc',
+  '1' : 'RC',
+  '2' : 'YC',
+  '3' : 'BC',
 };
 
 Widget getTypesOfPump({required mode,required AnimationController controller,required double animationValue}){
@@ -943,7 +947,7 @@ Widget getTypesOfPump({required mode,required AnimationController controller,req
     animation: controller,
     builder: (BuildContext context, Widget? child) {
       return CustomPaint(
-        painter: Pump(rotationAngle: [1,2].contains(mode)? animationValue : 0,mode: mode),
+        painter: Pump(rotationAngle: [1].contains(mode)? animationValue : 0,mode: mode),
         size: const Size(100,80),
       );
     },
@@ -1113,12 +1117,13 @@ Widget getLineWidget({required BuildContext context,required AnimationController
   var valve = payloadProvider.lineData[currentLine]['valve'].length;
   // var valve = 20;
   item += valve;
-  if(payloadProvider.lineData[currentLine]['pressureIn'] != null){
-    item += payloadProvider.lineData[currentLine]['pressureIn'].isNotEmpty ? 1 : 0;
-  }
-  if(payloadProvider.lineData[currentLine]['pressureOut'] != null){
-    item += payloadProvider.lineData[currentLine]['pressureOut'].isNotEmpty ? 1 : 0;
-  }
+  // if(payloadProvider.lineData[currentLine]['pressureIn'] != null){
+  //   item += payloadProvider.lineData[currentLine]['pressureIn'].isNotEmpty ? 1 : 0;
+  // }
+  // if(payloadProvider.lineData[currentLine]['pressureOut'] != null){
+  //   item += payloadProvider.lineData[currentLine]['pressureOut'].isNotEmpty ? 1 : 0;
+  // }
+  item += payloadProvider.lineData[currentLine]['pressureSensor'].length;
   if(payloadProvider.lineData[currentLine]['dpValve'] != null){
     item += payloadProvider.lineData[currentLine]['dpValve'].isNotEmpty ? 1 : 0;
   }
@@ -1128,10 +1133,8 @@ Widget getLineWidget({required BuildContext context,required AnimationController
   screenSize = MediaQuery.of(context).size.width - 40;
   var noWidgetInCalculatedWidth = screenSize / 70;
   double calculatedHeight = 0;
-  // print('noWidgetInCalculatedWidth : ${noWidgetInCalculatedWidth}  item : $item');
   if(item >= noWidgetInCalculatedWidth.round()){
     calculatedHeight = ((item/noWidgetInCalculatedWidth) + 1) * 77;
-    // calculatedHeight = (calculatedHeight * textScaleFactor).toInt();
   }else{
     calculatedHeight = (120 * textScaleFactor);
   }
@@ -1151,7 +1154,7 @@ Widget getLineWidget({required BuildContext context,required AnimationController
                 SizedBox(
                     width: 40,
                     height: joint == 'L_joint' ? calculatedHeight/2 : calculatedHeight.toDouble(),
-                    child: verticalPipeTopFlow(count: 5, mode: getWaterPipeStatus(context,selectedLine: selectedLine), controller: controller,)
+                    child: verticalPipeTopFlow(count: (calculatedHeight~/100)+2, mode: getWaterPipeStatus(context,selectedLine: selectedLine), controller: controller,)
                 ),
                 Positioned(
                     top: calculatedHeight/2 + 8,
@@ -1223,9 +1226,7 @@ Widget getLineWidget({required BuildContext context,required AnimationController
                             ],
                           ),
                         ),
-
-
-                      if(payloadProvider.lineData[currentLine]['pressureIn'] != null)
+                      for(var ps in payloadProvider.lineData[currentLine]['pressureSensor'])
                         SizedBox(
                           width: 70,
                           height: 60,
@@ -1236,25 +1237,40 @@ Widget getLineWidget({required BuildContext context,required AnimationController
                                 height: 23,
                                 child: Image.asset('assets/images/pressure_sensor.png'),
                               ),
-                              Text('PSI.${currentLine}.1 : \n${payloadProvider.lineData[currentLine]['pressureIn']}',style: TextStyle(fontSize: 12,overflow: TextOverflow.ellipsis),)
+                              Text('${ps['hid'].contains('LI') ? 'Press In' : 'Press Out'} : \n${ps['value']}',style: TextStyle(fontSize: 12,overflow: TextOverflow.ellipsis),)
                             ],
                           ),
                         ),
-                      if(payloadProvider.lineData[currentLine]['pressureOut'] != null)
-                        SizedBox(
-                          width: 70,
-                          height: 60,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 23,
-                                height: 23,
-                                child: Image.asset('assets/images/pressure_sensor.png'),
-                              ),
-                              Text('PSO.${currentLine}.1 : \n${payloadProvider.lineData[currentLine]['pressureOut']}',style: TextStyle(fontSize: 12,overflow: TextOverflow.ellipsis),)
-                            ],
-                          ),
-                        ),
+                      // if(payloadProvider.lineData[currentLine]['pressureSensor'] != null)
+                      //   SizedBox(
+                      //     width: 70,
+                      //     height: 60,
+                      //     child: Column(
+                      //       children: [
+                      //         SizedBox(
+                      //           width: 23,
+                      //           height: 23,
+                      //           child: Image.asset('assets/images/pressure_sensor.png'),
+                      //         ),
+                      //         Text('PSI.${currentLine}.1 : \n${payloadProvider.lineData[currentLine]['pressureIn']}',style: TextStyle(fontSize: 12,overflow: TextOverflow.ellipsis),)
+                      //       ],
+                      //     ),
+                      //   ),
+                      // if(payloadProvider.lineData[currentLine]['pressureSensor'] != null)
+                      //   SizedBox(
+                      //     width: 70,
+                      //     height: 60,
+                      //     child: Column(
+                      //       children: [
+                      //         SizedBox(
+                      //           width: 23,
+                      //           height: 23,
+                      //           child: Image.asset('assets/images/pressure_sensor.png'),
+                      //         ),
+                      //         Text('PSO.${currentLine}.1 : \n${payloadProvider.lineData[currentLine]['pressureOut']}',style: TextStyle(fontSize: 12,overflow: TextOverflow.ellipsis),)
+                      //       ],
+                      //     ),
+                      //   ),
                       for(var i = 0 ;i < mainValve;i++)
                         SizedBox(
                           width: 70,
@@ -1404,19 +1420,17 @@ class MarqueeText extends StatelessWidget {
   }
 }
 
-void sentUserOperationToServer(String msg, String data,BuildContext context) async
-{
+void sentUserOperationToServer(String msg,dynamic data,BuildContext context) async {
   var overAllPvd = Provider.of<OverAllUse>(context,listen: false);
   Map<String, Object> body = {
     "userId": overAllPvd.getUserId(),
     "controllerId": overAllPvd.controllerId,
     "messageStatus": msg,
-    "data": data,
-    "createUser": overAllPvd.getUserId()
+    "hardware" : data,
+    "createUser": overAllPvd.getUserId(),
   };
   final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
   if (response.statusCode == 200) {
-    print(response.body);
   } else {
     throw Exception('Failed to load data');
   }

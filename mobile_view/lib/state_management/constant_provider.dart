@@ -318,6 +318,7 @@ class ConstantProvider extends ChangeNotifier{
             for(var line in j.value){
               var type = [];
               var criticalType = [];
+
               for(var at in alarmType){
                 int commonSerialNo = 0;
                 if(setting['normalAlarm']?['${line['sNo']}']?['${at['name']}']?['sNo']?['sNo'] == null){
@@ -400,6 +401,7 @@ class ConstantProvider extends ChangeNotifier{
                   'base' : setting['moistureSensor']?['${ms['sNo']}']?['base'] ?? 'Current',
                   'minimum' : setting['moistureSensor']?['${ms['sNo']}']?['minimum'] ?? '0.00',
                   'maximum' : setting['moistureSensor']?['${ms['sNo']}']?['maximum'] ?? '0.00',
+                  'valve' : setting['moistureSensor']?['${ms['sNo']}']?['valve'] ?? '',
                 });
               }
               print('moisture Completed');
@@ -800,6 +802,7 @@ class ConstantProvider extends ChangeNotifier{
     notifyListeners();
   }
   void moistureSensorFunctionality(dynamic list){
+    print('list : $list');
     moistureSensorUpdated[list[1]][list[0]] = list[2];
     notifyListeners();
   }
@@ -996,9 +999,8 @@ class ConstantProvider extends ChangeNotifier{
     for(var i in mainValveUpdated){
       mv += '${mv.isNotEmpty ? ';' : ''}${i['sNo']},${i['hid']},${returnMvMode(i['mode'])},${i['delay']}';
     }
+
     payload['300']?.add({'302' : mv});
-
-
     var line = '';
     for(var i in irrigationLineUpdated){
       line += '${line.isNotEmpty ? ';' : ''}${i['sNo']},${i['hid']},${0},${i['leakageLimit']}';
@@ -1015,19 +1017,28 @@ class ConstantProvider extends ChangeNotifier{
 
     var wm = '';
     for(var i in waterMeterUpdated){
-      wm += '${wm.isNotEmpty ? ';' : ''}${i['sNo']},${i['location']},${i['hid']},${int.parse(i['ratio'])},${int.parse(i['maximumFlow'])}';
+      wm += '${wm.isNotEmpty ? ';' : ''}${i['sNo']},'
+          '${i['location']},'
+          '${i['hid']},'
+          '${int.parse(i['ratio'])},'
+          '${int.parse(i['maximumFlow'])},'
+          '${i['id'].contains('WMSP') ? 1 : i['id'].contains('WMIP') ? 2 : i['id'].contains('WMIL') ? 3 : 4}';
     }
     payload['300']?.add({'305' : wm});
-
-
     var fertilizer = '';
     for(var i in fertilizerUpdated){
       for(var fert in i['fertilizer']){
         fertilizer += '${fertilizer.isNotEmpty ? ';' : ''}'
-            '${fert['sNo']},${i['hid']},${fert['hid'][fert['hid'].length - 1]},'
-            '${noFlowBehavior(i['noFlowBehavior'])},${i['minimalOnTime']},'
-            '${i['minimalOffTime']},${i['boosterOffDelay']},${i['agitator']},'
-            '${i['waterFlowStabilityTime']},${fert['nominalFlow']},'
+            '${fert['sNo']},'
+            '${i['hid']},'
+            '${fert['hid'][fert['hid'].length - 1]},'
+            '${noFlowBehavior(i['noFlowBehavior'])},'
+            '${i['minimalOnTime']},'
+            '${i['minimalOffTime']},'
+            '${i['boosterOffDelay']},'
+            '${i['agitator']},'
+            '${i['waterFlowStabilityTime']},'
+            '${fert['nominalFlow']},'
             '${injectorMode(fert['injectorMode'])},'
             '${fert['ratio']},'
             '${fert['shortestPulse']},'
@@ -1072,7 +1083,8 @@ class ConstantProvider extends ChangeNotifier{
           '${i['units'] == 'bar' ? 1 : 2},'
           '${i['base'] == 'Voltage' ? 1 : 0},'
           '${double.parse(i['minimum'])},'
-          '${double.parse(i['maximum'])}';
+          '${double.parse(i['maximum'])},'
+          '${i['valve']}';
     }
     payload['300']?.add({'309' : ms});
 
@@ -1145,4 +1157,6 @@ class ConstantProvider extends ChangeNotifier{
     notifyListeners();
     return autoIncrement;
   }
+
 }
+

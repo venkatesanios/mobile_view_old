@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:mobile_view/FertilizerSet.dart';
 import 'package:mobile_view/screens/config/constant/constant_tab_bar_view.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/Logs/irrigation_and_pump_log.dart';
+import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/Logs/pump_logs.dart';
 import 'package:mobile_view/screens/customer/SystemDefinitionScreen/system_definition_screen.dart';
 import 'package:mobile_view/state_management/MqttPayloadProvider.dart';
 import 'package:provider/provider.dart';
@@ -90,8 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
       controllerId: 584,userId: 53,deviceId: "",customerId: 15,
     ),
     ViewSettings(userId: 15, controllerId: 1),
-    HourlyData(userId: 8, controllerId: 31, nodeControllerId: 0,),
-    NewPumpLogScreen(userId: 8, controllerId: 31, nodeControllerId: 0,),
+    PumpLogs(),
   ];
   DateTime? _lastPressedAt;
 
@@ -105,6 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if(payloadProvider.selectedSiteString == '' || overAllPvd.fromDealer){
       if(mounted) {
         getData();
+        Future.delayed(Duration.zero, () {
+          irrigationProgramProvider.updateBottomNavigation(0);
+        });
       }
     }
     // getData();
@@ -184,9 +187,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void autoReferesh()async{
     manager.subscribeToTopic('FirmwareToApp/${overAllPvd.imeiNo}');
     manager.publish(payloadProvider.publishMessage,'AppToFirmware/${overAllPvd.imeiNo}');
-    setState(() {
-      payloadProvider.tryingToGetPayload += 1;
-    });
+    if(mounted) {
+      setState(() {
+        payloadProvider.tryingToGetPayload += 1;
+      });
+    }
   }
 
   Future<void> getDashBoardData() async{
@@ -223,6 +228,9 @@ class _HomeScreenState extends State<HomeScreen> {
               var selectedMasterData = payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster];
               overAllPvd.userId = userId;
               overAllPvd.fromDealer = widget.fromDealer;
+              if(overAllPvd.fromDealer) {
+                overAllPvd.dealerId = widget.userId;
+              }
               overAllPvd.imeiNo = selectedMasterData['deviceId'];
               print(overAllPvd.imeiNo);
               overAllPvd.controllerId = selectedMasterData['controllerId'];
@@ -325,7 +333,303 @@ class _HomeScreenState extends State<HomeScreen> {
         parameterid.add(item.dealerDefinitionId!);
       }
     }
-    return httperroronhs ? Material(
+    return overAllPvd.fromDealer == false ?
+    PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        bool canPop = await _onWillPop(context);
+        if (canPop) {
+          Navigator.pop(context);
+        } else {
+          return;
+        }
+      },
+      child: httperroronhs ? Material(
+        child: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Network is unreachable!!'),
+              MaterialButton(
+                onPressed: (){
+                  getData();
+                },
+                child: Text('RETRY',style: TextStyle(color: Colors.white),),
+                color: Colors.blueGrey,
+              ),
+            ],
+          ),
+        ),
+      ) : Scaffold(
+         body: SafeArea(
+          child: isBottomSheet
+              ? _buildSelectedScreen()
+              : [1,2].contains(overAllPvd.controllerType)
+              ? _widgetOptions[irrigationProgramProvider.selectedIndex]
+              : [3,4].contains(overAllPvd.controllerType)
+              ? _widgetOptionspump[irrigationProgramProvider.selectedIndex]
+              : Container(),
+        ),
+         bottomNavigationBar: Container(
+          height: 75,
+          decoration: BoxDecoration(
+            boxShadow: customBoxShadow,
+            color: Colors.white,
+          ),
+          child: [1,2].contains(overAllPvd.controllerType) ? Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Dashboard";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(0);
+                  },
+                  icon: Icons.dashboard,
+                  selected: irrigationProgramProvider.selectedIndex == 0,
+                  label: "Dashboard"),
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Program";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(1);
+                  },
+                  icon: Icons.schedule,
+                  selected: irrigationProgramProvider.selectedIndex == 1,
+                  label: "Program"),
+              InkWell(
+                onTap: () {
+                  if(parameter.length > 0)
+                    {
+                  showModalBottomSheet(
+                      backgroundColor: Colors.white,
+                      context: context,
+                      transitionAnimationController: AnimationController(
+                        vsync: Navigator.of(context),
+                        duration: const Duration(
+                            milliseconds: 500), // Adjust the duration as needed
+                        reverseDuration: const Duration(
+                            milliseconds:
+                            300), // Adjust the reverse duration as needed
+                      ),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15))),
+                      // showDragHandle: true,
+                      builder: (BuildContext context) {
+                        return Consumer<OverAllUse>(
+                            builder: (context, overAllPvd, _) {
+                              return Container(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      topRight: Radius.circular(15)),
+                                  color: Colors.white,
+                                ),
+                                child:  RefreshIndicator(
+                                  onRefresh:  () => fetchData() ,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                        Container(
+                                          height: 310,
+                                          width: MediaQuery.of(context).size.width,
+                                          child: GridView.builder(
+                                            itemCount: parameter.length,
+                                            gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 4, // Number of columns
+                                              crossAxisSpacing:
+                                              10.0, // Spacing between columns
+                                              mainAxisSpacing:
+                                              25.0, // Spacing between rows
+                                              childAspectRatio:
+                                              1.0, // Aspect ratio (width / height) of each grid item
+                                            ),
+                                            itemBuilder: (context, index) {
+                                              return SizedBox(
+                                                // height: 30,
+                                                // width: 30,
+                                                child: buildMenuItems(
+                                                    context: context,
+                                                    label: "${parameter[index]}",
+                                                    id: parameterid[index],
+                                                    icon: Icons.water_damage,
+                                                    color: [
+                                                      const Color(0xffF1F7FF),
+                                                      const Color(0xffE9F2FF)
+                                                    ],
+                                                    borderColor:
+                                                    const Color(0xffC7DDFF),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        appBarTitle = "${parameter[index]}";
+                                                        isBottomSheet = true;
+                                                        selectIndex = parameterid[index];
+                                                        irrigationProgramProvider
+                                                            .updateBottomNavigation(-1);
+                                                      });
+                                                      Navigator.of(context).pop();
+                                                    }),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 30,
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            setState(() {
+                                              // isBottomSheet = false;
+                                            });
+                                          },
+                                          child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  gradient: linearGradientLeading,
+                                                  boxShadow: customBoxShadow),
+                                              child: const Icon(
+                                                Icons.keyboard_arrow_down,
+                                                size: 35,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                        );
+                      });
+                }else{
+                    setState(() {
+                      fetchData();
+                    });
+              }},
+                child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: linearGradientLeading,
+                        boxShadow: customBoxShadow),
+                    child: const Icon(
+                      Icons.keyboard_arrow_up,
+                      size: 35,
+                      color: Colors.white,
+                    )),
+              ),
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Schedule";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(2);
+                  },
+                  icon: Icons.calendar_month,
+                  selected: irrigationProgramProvider.selectedIndex == 2,
+                  label: "Schedule"),
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Log";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(3);
+                  },
+                  icon: Icons.assessment,
+                  selected: irrigationProgramProvider.selectedIndex == 3,
+                  label: "Log"),
+            ],
+          ) : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Dashboard";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(0);
+                  },
+                  icon: Icons.dashboard,
+                  selected: irrigationProgramProvider.selectedIndex == 0,
+                  label: "Dashboard"),
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Settings";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(1);
+                  },
+                  icon: Icons.settings,
+                  selected: irrigationProgramProvider.selectedIndex == 1,
+                  label: "Settings"),
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "View";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(2);
+                  },
+                  icon: Icons.schedule,
+                  selected: irrigationProgramProvider.selectedIndex == 2,
+                  label: "View"),
+              buildBottomNavigationTab(
+                  context: context,
+                  onPressed: () {
+                    setState(() {
+                      appBarTitle = "Logs";
+                      isBottomSheet = false;
+                    });
+                    irrigationProgramProvider.updateBottomNavigation(3);
+                  },
+                  icon: Icons.auto_graph,
+                  selected: irrigationProgramProvider.selectedIndex == 3,
+                  label: "Logs"),
+              // buildBottomNavigationTab(
+              //     context: context,
+              //     onPressed: () {
+              //       setState(() {
+              //         appBarTitle = "Log";
+              //         isBottomSheet = false;
+              //       });
+              //       irrigationProgramProvider.updateBottomNavigation(4);
+              //     },
+              //     icon: Icons.auto_graph,
+              //     selected: irrigationProgramProvider.selectedIndex == 4,
+              //     label: "Log"),
+            ],
+          ),
+        ),
+      ))
+     :  httperroronhs ? Material(
       child: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -423,83 +727,86 @@ class _HomeScreenState extends State<HomeScreen> {
                                     topRight: Radius.circular(15)),
                                 color: Colors.white,
                               ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    Container(
-                                      height: 310,
-                                      width: MediaQuery.of(context).size.width,
-                                      child: GridView.builder(
-                                        itemCount: parameter.length,
-                                        gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 4, // Number of columns
-                                          crossAxisSpacing:
-                                          10.0, // Spacing between columns
-                                          mainAxisSpacing:
-                                          25.0, // Spacing between rows
-                                          childAspectRatio:
-                                          1.0, // Aspect ratio (width / height) of each grid item
-                                        ),
-                                        itemBuilder: (context, index) {
-                                          return SizedBox(
-                                            // height: 30,
-                                            // width: 30,
-                                            child: buildMenuItems(
-                                                context: context,
-                                                label: "${parameter[index]}",
-                                                id: parameterid[index],
-                                                icon: Icons.water_damage,
-                                                color: [
-                                                  const Color(0xffF1F7FF),
-                                                  const Color(0xffE9F2FF)
-                                                ],
-                                                borderColor:
-                                                const Color(0xffC7DDFF),
-                                                onTap: () {
-                                                  setState(() {
-                                                    appBarTitle = "${parameter[index]}";
-                                                    isBottomSheet = true;
-                                                    selectIndex = parameterid[index];
-                                                    irrigationProgramProvider
-                                                        .updateBottomNavigation(-1);
-                                                  });
-                                                  Navigator.of(context).pop();
-                                                }),
-                                          );
-                                        },
+                              child:  RefreshIndicator(
+                                onRefresh:  () => fetchData() ,
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 20,
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 30,
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        setState(() {
-                                          // isBottomSheet = false;
-                                        });
-                                      },
-                                      child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: linearGradientLeading,
-                                              boxShadow: customBoxShadow),
-                                          child: const Icon(
-                                            Icons.keyboard_arrow_down,
-                                            size: 35,
-                                            color: Colors.white,
-                                          )),
-                                    ),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                  ],
+                                      Container(
+                                        height: 310,
+                                        width: MediaQuery.of(context).size.width,
+                                        child: GridView.builder(
+                                          itemCount: parameter.length,
+                                          gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 4, // Number of columns
+                                            crossAxisSpacing:
+                                            10.0, // Spacing between columns
+                                            mainAxisSpacing:
+                                            25.0, // Spacing between rows
+                                            childAspectRatio:
+                                            1.0, // Aspect ratio (width / height) of each grid item
+                                          ),
+                                          itemBuilder: (context, index) {
+                                            return SizedBox(
+                                              // height: 30,
+                                              // width: 30,
+                                              child: buildMenuItems(
+                                                  context: context,
+                                                  label: "${parameter[index]}",
+                                                  id: parameterid[index],
+                                                  icon: Icons.water_damage,
+                                                  color: [
+                                                    const Color(0xffF1F7FF),
+                                                    const Color(0xffE9F2FF)
+                                                  ],
+                                                  borderColor:
+                                                  const Color(0xffC7DDFF),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      appBarTitle = "${parameter[index]}";
+                                                      isBottomSheet = true;
+                                                      selectIndex = parameterid[index];
+                                                      irrigationProgramProvider
+                                                          .updateBottomNavigation(-1);
+                                                    });
+                                                    Navigator.of(context).pop();
+                                                  }),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 30,
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          setState(() {
+                                            // isBottomSheet = false;
+                                          });
+                                        },
+                                        child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient: linearGradientLeading,
+                                                boxShadow: customBoxShadow),
+                                            child: const Icon(
+                                              Icons.keyboard_arrow_down,
+                                              size: 35,
+                                              color: Colors.white,
+                                            )),
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -611,6 +918,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+
   }
   Future<bool> _onWillPop(BuildContext context) async {
     return await showDialog(
@@ -828,28 +1136,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: getIconsMenu(id!),
             ),
           ),
-          // Container(
-          //   height: 40,
-          //   width: 40,
-          //   padding: const EdgeInsets.all(10),
-          //   decoration: BoxDecoration(
-          //     // borderRadius: BorderRadius.circular(100),
-          //     gradient: LinearGradient(
-          //         begin: Alignment.topCenter,
-          //         end: Alignment.bottomCenter,
-          //         colors: color),
-          //     // boxShadow: customBoxShadow,
-          //     // decoration: BoxDecoration(
-          //     shape: BoxShape.circle,
-          //     // color: Colors.blue, // Adjust color as needed
-          //   ),
-          //   // border:
-          //   // Border.all(color: borderColor ?? Colors.grey, width: 0.3)),
-          //   child: Center(
-          //     child: getIconsMenu(label!),
-          //   ),
-          // ),
-          SizedBox(
+      SizedBox(
             height: 5,
           ),
           SizedBox(

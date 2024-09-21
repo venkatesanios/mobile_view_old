@@ -510,7 +510,8 @@ class _PumpControllerDashboardState extends State<PumpControllerDashboard> with 
                               "controllerId": widget.controllerId,
                               "data": {"sentSms": "motor${index+1}on"},
                               "messageStatus": "Motor${index+1} On",
-                              "createUser": widget.userId
+                              "createUser": widget.userId,
+                              "hardware": {"sentSms": "motor${index+1}on"}
                             };
                             await MQTTManager().publish(jsonEncode({"sentSms": "motor${index+1}on"}), "AppToFirmware/${widget.deviceId}");
                             await HttpService().postRequest("createUserManualOperationInDashboard", data);
@@ -528,7 +529,8 @@ class _PumpControllerDashboardState extends State<PumpControllerDashboard> with 
                               "controllerId": widget.controllerId,
                               "data": {"sentSms": "motor${index+1}off"},
                               "messageStatus": "Motor${index+1} Off",
-                              "createUser": widget.userId
+                              "createUser": widget.userId,
+                              "hardware": {"sentSms": "motor${index+1}off"}
                             };
                             await MQTTManager().publish(jsonEncode({"sentSms": "motor${index+1}off"}), "AppToFirmware/${widget.deviceId}");
                             await HttpService().postRequest("createUserManualOperationInDashboard", data);

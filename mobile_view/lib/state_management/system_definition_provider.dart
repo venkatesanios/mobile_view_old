@@ -9,6 +9,7 @@ import '../constants/http_service.dart';
 class SystemDefinitionProvider extends ChangeNotifier{
   final HttpService httpService = HttpService();
   int _selectedSegment = 0;
+  bool enableAll = false;
 
   int get selectedSegment => _selectedSegment;
 
@@ -41,6 +42,13 @@ class SystemDefinitionProvider extends ChangeNotifier{
         final convertedJson = jsonDecode(responseJson);
         List<dynamic> result = convertedJson['data'];
         _irrigationLineSystemData = result.map((e) => IrrigationLineSystemData.fromJson(e)).toList();
+        if(_irrigationLineSystemData != null && _irrigationLineSystemData!.isNotEmpty) {
+          Future.delayed(Duration.zero, () {
+            if(_irrigationLineSystemData!.every((element) => element.systemDefinition.irrigationLineOn == true)){
+              enableAll = true;
+            }
+          });
+        }
       } else {
         log("HTTP Request failed or received an unexpected response.");
       }

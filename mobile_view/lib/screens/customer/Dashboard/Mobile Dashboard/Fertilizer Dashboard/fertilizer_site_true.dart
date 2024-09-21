@@ -35,7 +35,7 @@ class _FertilizerSiteTrueState extends State<FertilizerSiteTrue> with SingleTick
 
   @override
   void dispose() {
-    print('Fertilizer Site True is dispose');
+    // print('Fertilizer Site True is dispose');
     // TODO: implement dispose
     _controller.dispose();
     super.dispose();

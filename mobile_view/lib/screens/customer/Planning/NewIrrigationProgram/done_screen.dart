@@ -61,7 +61,10 @@ class _AdditionalDataScreenState extends State<AdditionalDataScreen> {
                                     autofocus: true,
                                     controller: _textEditingController,
                                     onChanged: (newValue) => tempProgramName = newValue,
-                                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(20),
+                                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+                                    ],
                                   ),
                                   actions: <Widget>[
                                     TextButton(

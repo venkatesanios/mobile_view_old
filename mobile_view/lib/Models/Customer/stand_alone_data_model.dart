@@ -151,7 +151,7 @@ class ManualOperationData {
     addToFinalList(fan);
     addToFinalList(fogger);
 
-    print('finalList : ${finalList}');
+    // print('finalList : ${finalList}');
     return {
       "startFlag": startFlag,
       "method": method,

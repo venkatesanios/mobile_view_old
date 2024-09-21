@@ -62,7 +62,7 @@ class _SystemDefinitionState extends State<SystemDefinition> {
     mqttPayloadProvider = Provider.of<MqttPayloadProvider>(context, listen: true);
     overAllPvd = Provider.of<OverAllUse>(context, listen: true);
     final screenSize = MediaQuery.of(context).size.width;
-    return RefreshIndicator(
+    return systemDefinitionProvider.irrigationLineSystemData != null ? RefreshIndicator(
       onRefresh: () => systemDefinitionProvider.getUserPlanningSystemDefinition(overAllPvd.userId, overAllPvd.controllerId),
       child: Scaffold(
         appBar: screenSize <= 600 ? AppBar(
@@ -122,6 +122,42 @@ class _SystemDefinitionState extends State<SystemDefinition> {
                         if(systemDefinitionProvider.selectedIrrigationLine == lineIndex) {
                           return screenSize <= 600 ? Column(
                             children: [
+                              if(systemDefinitionProvider.selectedIrrigationLine == 0)
+                                const SizedBox(height: 15,),
+                              if(systemDefinitionProvider.selectedIrrigationLine == 0)
+                                buildSwitchTile(
+                                  title: "All irrigation line should run while power off",
+                                  value: systemDefinitionProvider.enableAll,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      systemDefinitionProvider.enableAll = newValue;
+                                      for(var i = 0; i < systemDefinitionProvider.irrigationLineSystemData!.length; i++) {
+                                        if(systemDefinitionProvider.enableAll) {
+                                          systemDefinitionProvider.irrigationLineSystemData![i].systemDefinition.irrigationLineOn = true;
+                                        } else {
+                                          systemDefinitionProvider.irrigationLineSystemData![i].systemDefinition.irrigationLineOn = false;
+                                        }
+                                      }
+                                    });
+                                  },
+                                  icon: Icons.clear_all,
+                                ),
+                              const SizedBox(height: 15,),
+                              buildSwitchTile(
+                                title: "Should run while power off",
+                                value: systemDefinitionProvider.irrigationLineSystemData![lineIndex].systemDefinition.irrigationLineOn,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    systemDefinitionProvider.irrigationLineSystemData![lineIndex].systemDefinition.irrigationLineOn = newValue;
+                                    if(systemDefinitionProvider.irrigationLineSystemData!.every((element) => element.systemDefinition.irrigationLineOn == true)){
+                                      systemDefinitionProvider.enableAll = true;
+                                    } else {
+                                      systemDefinitionProvider.enableAll = false;
+                                    }
+                                  });
+                                },
+                                icon: Icons.power_settings_new,
+                              ),
                               const SizedBox(height: 15,),
                               buildSwitchTile(
                                 title: "Enable energy save function",
@@ -130,8 +166,6 @@ class _SystemDefinitionState extends State<SystemDefinition> {
                                   setState(() {
                                     systemDefinitionProvider.irrigationLineSystemData![lineIndex].systemDefinition.status = newValue;
                                   });
-                                  print(newValue);
-                                  print(systemDefinitionProvider.selectedSegment);
                                 },
                                 icon: Icons.energy_savings_leaf,
                               ),
@@ -432,15 +466,6 @@ class _SystemDefinitionState extends State<SystemDefinition> {
           ),
           textColor: Colors.white,
           onPressed: () async{
-            Map<String, dynamic> userData = {
-              "userId": overAllPvd.userId,
-              "controllerId": overAllPvd.controllerId,
-              "createUser": overAllPvd.userId,
-            };
-            Map<String, dynamic> dataToSend = {
-              "systemDefinition" : systemDefinitionProvider.irrigationLineSystemData!.map((e) => e.toJson()).toList()
-            };
-            userData.addAll(dataToSend);
             // print(systemDefinitionProvider.irrigationLineSystemData!.map((e) => e.toMqtt()).toList().join("\n"));
             Map<String, dynamic> dataToMqtt = {
               "2200": [
@@ -451,6 +476,14 @@ class _SystemDefinitionState extends State<SystemDefinition> {
                   "2202": "${overAllPvd.userId}"
                 }
               ]
+            };
+
+            Map<String, dynamic> userData = {
+              "userId": overAllPvd.userId,
+              "controllerId": overAllPvd.controllerId,
+              "createUser": overAllPvd.userId,
+              "systemDefinition" : systemDefinitionProvider.irrigationLineSystemData!.map((e) => e.toJson()).toList(),
+              "hardware": dataToMqtt
             };
             // print(dataToMqtt);
             try {
@@ -489,7 +522,7 @@ class _SystemDefinitionState extends State<SystemDefinition> {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
-    );
+    ) : CircularProgressIndicator();
   }
 
   Widget buildTimePicker(

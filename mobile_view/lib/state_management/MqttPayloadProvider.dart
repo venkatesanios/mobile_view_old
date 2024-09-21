@@ -28,6 +28,8 @@ class MqttPayloadProvider with ChangeNotifier {
   //Todo : Dashboard start
   int tryingToGetPayload = 0;
   dynamic wifiStrength = '';
+  String version = '';
+  int powerSupply = 0;
   dynamic listOfSite = [];
   dynamic listOfSharedUser = {};
   bool httpError = false;
@@ -69,6 +71,10 @@ class MqttPayloadProvider with ChangeNotifier {
   int selectedNextSchedule = 0;
   int selectedProgram = 0;
   DateTime lastUpdate = DateTime.now();
+  String sheduleLog = '';
+  String uardLog = '';
+  String uard0Log = '';
+  String uard4Log = '';
 
   void editLoading(bool value){
     loading = value;
@@ -96,7 +102,7 @@ class MqttPayloadProvider with ChangeNotifier {
     for(var i in data){
       lineData.add(i);
     }
-    lineData.insert(0,{'id' : 'All','location' : '','mode' : 0,'name' : 'All','mainValve' : [],'valve' : []});
+    lineData.insert(0,{'id' : 'All','location' : '','mode' : 0,'name' : 'All line','mainValve' : [],'valve' : []});
     for(var i in lineData){
       i['mode'] = 0;
     }
@@ -501,6 +507,25 @@ class MqttPayloadProvider with ChangeNotifier {
       if(data.containsKey('cM')){
         messageFromHw = data;
       }
+      //Controller Log
+      if(data.containsKey('6600')) {
+        if (data['6600'].containsKey('6601')) {
+          sheduleLog += "\n";
+          sheduleLog += data['6600']['6601'];
+        }
+        if (data['6600'].containsKey('6602')) {
+          uardLog += "\n";
+          uardLog += data['6600']['6602'];
+        }
+        if (data['6600'].containsKey('6603')) {
+          uard0Log += "\n";
+          uard0Log += data['6600']['6603'];
+        }
+        if (data['6600'].containsKey('6604')) {
+          uard4Log += "\n";
+          uard4Log += data['6600']['6604'];
+        }
+      }
 
       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
         dashBoardPayload = payload;
@@ -532,8 +557,6 @@ class MqttPayloadProvider with ChangeNotifier {
             // // print('nextSchedule : $nextSchedule');
           }
         }
-
-
         if (data['2400'][0].containsKey('2404')) {
           upcomingProgram = data['2400'][0]['2404'];
           if(dataFromHttp){
@@ -602,8 +625,8 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('2408')) {
           List<dynamic> items = data['2400'][0]['2408'];
           sensorInLines = items;
-          // // print("sensorInLines ==> $sensorInLines");
-          // // print("lineData[0]['mode'] => ${lineData[0]['mode']}");
+          // print("sensorInLines ==> $sensorInLines");
+          // print("lineData[0]['mode'] => ${lineData[0]['mode']}");
           if(sensorInLines.isNotEmpty && sensorInLines.every((element) => element['IrrigationPauseFlag'] == sensorInLines[0]['IrrigationPauseFlag'])){
             lineData[0]['mode'] = sensorInLines[0]['IrrigationPauseFlag'];
           }else{
@@ -614,11 +637,11 @@ class MqttPayloadProvider with ChangeNotifier {
               if(i['S_No'] == lineData[l]['sNo']){
                 if(i['PrsIn'] != '-'){
                   for(var ps in lineData[l]['pressureSensor']){
-                    // // print('ps => $ps');
                     // print('ps => $ps');
                     if(ps['hid'] == 'LI.${l}'){
                       ps['value'] = i['PrsIn'];
                     }
+                    print('ps => $ps');
                   }
                 }
                 if(i['PrsOut'] != '-'){
@@ -660,7 +683,7 @@ class MqttPayloadProvider with ChangeNotifier {
             }
           }
           flowMeter.addAll(items.where((item) => item['Watermeter'] != '-').map((item) => item['Watermeter']));
-          // // print('flowMeter : $flowMeter');
+          // print('flowMeter : $flowMeter');
         }
 
         if (data['2400'][0].containsKey('2409')) {
@@ -670,7 +693,13 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];
         }
+        if (data['2400'][0].containsKey('Version')) {
+          version = data['2400'][0]['Version'];
+        }
 
+        if (data['2400'][0].containsKey('PowerSupply')) {
+          powerSupply = data['2400'][0]['PowerSupply'];
+        }
         if (data['2400'][0].containsKey('2410')) {
           waterMeter = data['2400'][0]['2410'];
         }
@@ -684,17 +713,21 @@ class MqttPayloadProvider with ChangeNotifier {
             nodeData = rawData.map((item) => NodeModel.fromJson(item)).toList();
           } else {
             nodeData = nodeData.map((node) {
-              var updatedStatus = rawData.firstWhere(
-                    (item) {
-                  // // print("item ==> ${item}");
-                  // // print("node.serialNumber ==> ${node.serialNumber}");
-                  return item['SNo'] == node.serialNumber;
-                },
-                orElse: () => {'Status': node.status}, // Default value
-              )['Status'];
-
-              return node.updateStatus(updatedStatus);
+              var updatedData = rawData.firstWhere(
+                      (item) {
+                    return item['SNo'] == node.serialNumber;
+                  },
+                  orElse: () => {
+                    'Status': node.status,
+                    'RlyStatus': node.rlyStatus.map((r) => r.toJson()).toList()
+                  }
+              );
+              var updatedStatus = updatedData['Status'];
+              var rawRlyStatus = updatedData['RlyStatus'] as List;
+              List<RelayStatus> updatedRlyStatus = rawRlyStatus.map((r) => RelayStatus.fromJson(r)).toList();
+              return node.updateStatusAndRlyStatus(updatedStatus, updatedRlyStatus);
             }).toList();
+
           }
         }
 

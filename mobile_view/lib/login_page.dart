@@ -94,8 +94,7 @@ class _LoginFormState extends State<LoginForm> {
                                             child: InternationalPhoneNumberInput(
                                               inputDecoration: InputDecoration(
                                                 border: const OutlineInputBorder(),
-                                                icon: const Icon(Icons.phone_outlined),
-                                                labelText: 'Phone Number',
+                                                 labelText: 'Phone Number',
                                                 suffixIcon: IconButton(icon: const Icon(Icons.clear, color: Colors.red,),
                                                     onPressed: () {
                                                       _mobileNoController.clear();
@@ -107,7 +106,7 @@ class _LoginFormState extends State<LoginForm> {
                                               selectorConfig: const SelectorConfig(
                                                 selectorType: PhoneInputSelectorType.DROPDOWN,
                                                 setSelectorButtonAsPrefixIcon: true,
-                                                leadingPadding: 10,
+                                                leadingPadding: 2,
                                                 useEmoji: true,
                                               ),
                                               ignoreBlank: false,
@@ -130,7 +129,6 @@ class _LoginFormState extends State<LoginForm> {
                                             decoration: InputDecoration(
                                               contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                                               border: const OutlineInputBorder(),
-                                              icon: const Icon(Icons.lock_outline),
                                               labelText: 'Password',
                                               suffixIcon: IconButton(icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off),
                                                   onPressed: () {
@@ -180,28 +178,23 @@ class _LoginFormState extends State<LoginForm> {
                                                        'password': _passwordController
                                                            .text,
                                                        'deviceToken': userIdFromPref,
+                                                       'isMobile' : true
                                                      };
-                                                     final response = await HttpService()
-                                                         .postRequest(
-                                                         "userSignIn", body);
+                                                     final response = await HttpService().postRequest("userSignIn", body);
                                                      //print(response.body);
-                                                     if (response.statusCode ==
-                                                         200) {
-                                                       var data = jsonDecode(
-                                                           response.body);
-                                                       if (data["code"] ==
-                                                           200) {
-                                                         _mobileNoController
-                                                             .clear();
-                                                         _passwordController
-                                                             .clear();
+                                                     if (response.statusCode == 200) {
+                                                       var data = jsonDecode(response.body);
+                                                       if (data["code"] == 200) {
+                                                         _mobileNoController.clear();
+                                                         _passwordController.clear();
 
                                                          final customerData = data["data"];
                                                          final customerInfo = customerData["user"];
 
                                                          /*List<dynamic> siteData = data['data']['site'];
                                                   List<String> siteList = siteData.map((site) => json.encode(site)).toList();*/
-                                                         print(customerInfo);
+                                                         // print(customerInfo);
+                                                         print("customerData ==> $customerData");
 
                                                          if(customerInfo["userType"] != 1) {
                                                            final prefs = await SharedPreferences.getInstance();

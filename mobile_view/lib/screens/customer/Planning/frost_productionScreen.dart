@@ -120,7 +120,7 @@ class _ConditionUIState extends State<FrostMobUI>
               'Currently No Frost Production & Rain Delay Sets Available'));
     } else {
       return Scaffold(backgroundColor: Color(0xffE6EDF5),
-        appBar: AppBar(title: Text('Frost Production'),),
+        appBar: AppBar(title: Text('Frost Production'),automaticallyImplyLeading: false,),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Form(
@@ -718,6 +718,7 @@ class _ConditionUIState extends State<FrostMobUI>
       "controllerId": overAllPvd.controllerId,
       "frostProtection": frostProtection,
       "rainDelay": rainDelay,
+      "hardware": payLoadFinal,
       "createUser": overAllPvd.userId
     };
     final response = await HttpService()

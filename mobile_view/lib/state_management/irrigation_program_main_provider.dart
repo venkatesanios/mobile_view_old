@@ -2708,7 +2708,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   //TODO: UPDATE PROGRAM DETAILS
   Future<String> updateUserProgramDetails(
-      int userId, int controllerId, int serialNumber, int programId, String programName, String priority, defaultProgramName, String controllerReadStatus) async {
+      int userId, int controllerId, int serialNumber, int programId, String programName, String priority, defaultProgramName, String controllerReadStatus, hardwareData) async {
     try {
       Map<String, dynamic> userData = {
         "userId": userId,
@@ -2719,7 +2719,8 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         "programName": programName,
         "priority": priority,
         "defaultProgramName": defaultProgramName,
-        "controllerReadStatus": controllerReadStatus
+        "controllerReadStatus": controllerReadStatus,
+        "hardware": hardwareData
       };
 
       var updateUserProgramDetails = await httpService.putRequest('updateUserProgramDetails', userData);

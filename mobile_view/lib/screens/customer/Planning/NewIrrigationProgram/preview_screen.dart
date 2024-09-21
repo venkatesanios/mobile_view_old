@@ -375,7 +375,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
       if(element['onOff'] == true) {
         resultList.add(check ? ((element[item] == "Time" || element[item] == "Pro.time") ? element['timeValue'] : element['quantityValue']) : element[item]);
         result = resultList.join(', ');
-        print("result ==> $result");
+        // print("result ==> $result");
       }
     }
     return result == "" ? "Not selected" : result;

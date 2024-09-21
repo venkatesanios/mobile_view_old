@@ -254,7 +254,7 @@ class _watersourceUI1State extends State<watersourceUI1>
           animationDuration: const Duration(milliseconds: 888),
           length: _watersource.data!.length,
           child: Scaffold(backgroundColor: Color(0xffE6EDF5),
-            appBar: AppBar(title: Text('Water Source'),),
+            appBar: AppBar(title: Text('Water Source'),automaticallyImplyLeading: false,),
              body: Padding(
               padding: const EdgeInsets.only(left: 8, bottom: 80, right: 8, top: 8),
               child: Center(
@@ -784,19 +784,21 @@ class _watersourceUI1State extends State<watersourceUI1>
 
     List<Map<String, dynamic>> waterSource =
         _watersource.data!.map((condition) => condition.toJson()).toList();
-    Map<String, Object> body = {
-      "userId": overAllPvd.userId,
-      "controllerId": overAllPvd.controllerId,
-      "waterSource": waterSource,
-      "createUser": overAllPvd.userId
-    };
-     String mqttSendData = toMqttFormat(_watersource.data);
+    String mqttSendData = toMqttFormat(_watersource.data);
 
     Map<String, dynamic> payLoadFinal = {
       "1600": [
         {"1601": mqttSendData},
       ]
     };
+    Map<String, Object> body = {
+      "userId": overAllPvd.userId,
+      "controllerId": overAllPvd.controllerId,
+      "waterSource": waterSource,
+      "hardware": payLoadFinal,
+      "createUser": overAllPvd.userId
+    };
+
 
     if (MQTTManager().isConnected == true) {
       await validatePayloadSent(

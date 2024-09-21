@@ -1,23 +1,24 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:excel/excel.dart';
 import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/IrrigationLog/scrollingTable.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:excel/excel.dart';
+
 import '../../../../../FertilizerSet.dart';
 import '../../../../../ListOfFertilizerInSet.dart';
 import '../../../../../Models/Customer/log/irrigation_parameter_model.dart';
 import '../../../../../constants/http_service.dart';
 import '../../../../../state_management/overall_use.dart';
-import '../schedule_program.dart';
 
 class LogHome extends StatefulWidget {
   final dynamic serverData;
@@ -256,8 +257,8 @@ class _LogHomeState extends State<LogHome> {
       var response = await service.postRequest(
           'getUserControllerLog',
           {
-            "userId":overAllPvd.userId,
-            "controllerId":overAllPvd.controllerId,
+            "userId":widget.userId,
+            "controllerId":widget.controllerId,
             "logType" : "Irrigation",
             "fromDate" : formattedDate1,
             "toDate" : formattedDate2,
@@ -267,20 +268,22 @@ class _LogHomeState extends State<LogHome> {
       var jsonData = jsonDecode(response.body);
       print('jsonData $jsonData');
       print('js == > ${jsonData['data']}');
-      setState(() {
-        dataSource = jsonData['data'];
-        dataToShow = {};
-        program = [];
-        programDuplicate = [];
-        valve = [];
-        valveDuplicate = [];
-        line = [];
-        lineDuplicate = [];
-        date = [];
-        dateDuplicate = [];
-        status = [];
-        statusDuplicate = [];
-      });
+      if(jsonData['code'] == 200){
+        setState(() {
+          dataSource = jsonData['data'];
+          dataToShow = {};
+          program = [];
+          programDuplicate = [];
+          valve = [];
+          valveDuplicate = [];
+          line = [];
+          lineDuplicate = [];
+          date = [];
+          dateDuplicate = [];
+          status = [];
+          statusDuplicate = [];
+        });
+      }
       if(dataSource != null){
         print(dataSource.length);
         for(var data in dataSource){
@@ -624,269 +627,271 @@ class _LogHomeState extends State<LogHome> {
               const SizedBox(width: 20,),
             ],
           ),
-          body: (dataSource == null || dataToShow.isEmpty)
-              ? SafeArea(child: Center(
-            child: Text('There is no data in ${_selectedDate}'),
-          ) )
-              : SafeArea(
+          body: SafeArea(
             child: httpError == 0
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  margin: EdgeInsets.all(8),
-                  width: double.infinity,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: Color(0xffE6EDF5),
-                      borderRadius: BorderRadius.circular(20)
-                  ),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for(var i = 0;i < _irrigationOptionWise.length;i++)
-                          Row(
-                            children: [
-                              myButtons(
-                                index: i,
-                                verticalPadding: 8,
-                                radius: 15,
-                                name: '${_irrigationOptionWise[i][0]}',
-                                onTap: (){
-                                  getDialog(context);
-                                  Future.delayed(Duration(seconds: 1),(){
-                                    setState(() {
-                                      _scrollController.animateTo(
-                                        (i * (_selectedIndex > i ? 100 : 100)).toDouble(),
-                                        duration: Duration(milliseconds: 500),
-                                        curve: Curves.easeInOut,
-                                      );
-                                      _irrigationOptionWise[i][1] = true;
-                                      _selectedIndex = i;
-                                      for(var j = 0;j < _irrigationOptionWise.length;j++){
-                                        if(j != i){
-                                          _irrigationOptionWise[j][1] = false;
+                if((dataSource != null || dataToShow.isNotEmpty))
+                  Container(
+                    margin: EdgeInsets.all(8),
+                    width: double.infinity,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Color(0xffE6EDF5),
+                        borderRadius: BorderRadius.circular(20)
+                    ),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for(var i = 0;i < _irrigationOptionWise.length;i++)
+                            Row(
+                              children: [
+                                myButtons(
+                                  index: i,
+                                  verticalPadding: 8,
+                                  radius: 15,
+                                  name: '${_irrigationOptionWise[i][0]}',
+                                  onTap: (){
+                                    getDialog(context);
+                                    Future.delayed(Duration(seconds: 1),(){
+                                      setState(() {
+                                        _scrollController.animateTo(
+                                          (i * (_selectedIndex > i ? 100 : 100)).toDouble(),
+                                          duration: Duration(milliseconds: 500),
+                                          curve: Curves.easeInOut,
+                                        );
+                                        _irrigationOptionWise[i][1] = true;
+                                        _selectedIndex = i;
+                                        for(var j = 0;j < _irrigationOptionWise.length;j++){
+                                          if(j != i){
+                                            _irrigationOptionWise[j][1] = false;
+                                          }
                                         }
-                                      }
-                                      if(_irrigationOptionWise[0][1] == true){
-                                        dataToShow = irrigationParameterArray.editDateWise(dataSource, date);
-                                      }else if(_irrigationOptionWise[1][1] == true){
-                                        dataToShow = irrigationParameterArray.editProgramWise(dataSource, program);
-                                      }else if(_irrigationOptionWise[2][1] == true){
-                                        dataToShow = irrigationParameterArray.editLineWise(dataSource, line);
-                                      }else if(_irrigationOptionWise[3][1] == true){
-                                        dataToShow = irrigationParameterArray.editValveWise(dataSource, valve);
-                                      }else if(_irrigationOptionWise[4][1] == true){
-                                        dataToShow = irrigationParameterArray.editStatusWise(dataSource, status);
-                                      }
+                                        if(_irrigationOptionWise[0][1] == true){
+                                          dataToShow = irrigationParameterArray.editDateWise(dataSource, date);
+                                        }else if(_irrigationOptionWise[1][1] == true){
+                                          dataToShow = irrigationParameterArray.editProgramWise(dataSource, program);
+                                        }else if(_irrigationOptionWise[2][1] == true){
+                                          dataToShow = irrigationParameterArray.editLineWise(dataSource, line);
+                                        }else if(_irrigationOptionWise[3][1] == true){
+                                          dataToShow = irrigationParameterArray.editValveWise(dataSource, valve);
+                                        }else if(_irrigationOptionWise[4][1] == true){
+                                          dataToShow = irrigationParameterArray.editStatusWise(dataSource, status);
+                                        }
 
+                                      });
+                                      Navigator.pop(context);
                                     });
-                                    Navigator.pop(context);
-                                  });
 
 
-                                },
-                              ),
-                              const SizedBox(width: 20,)
-                            ],
-                          )
-                      ],
+                                  },
+                                ),
+                                const SizedBox(width: 20,)
+                              ],
+                            )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                if(graphMode == false)
-                  Expanded(
-                    child: Column(
-                      children: [
-                        if(dataToShow.isNotEmpty)
-                          ScrollingTable(
-                            fixedColumn: dataToShow['fixedColumn'],
-                            fixedColumnData: filterDataByPages(data: dataToShow['fixedColumnData']),
-                            generalColumn: dataToShow['generalColumn'],
-                            generalColumnData: filterDataByPages(data: dataToShow['generalColumnData']),
-                            waterColumn: dataToShow['waterColumn'],
-                            waterColumnData: filterDataByPages(data: dataToShow['waterColumnData']),
-                            filterColumn: dataToShow['filterColumn'],
-                            filterColumnData: filterDataByPages(data: dataToShow['filterColumnData']),
-                            prePostColumn: dataToShow['prePostColumn'],
-                            prePostColumnData: filterDataByPages(data: dataToShow['prePostColumnData']),
-                            centralEcPhColumn: dataToShow['centralEcPhColumn'],
-                            centralEcPhColumnData: filterDataByPages(data: dataToShow['centralEcPhColumnData']),
-                            centralChannel1Column: dataToShow['centralChannel1Column'],
-                            centralChannel1ColumnData: filterDataByPages(data: dataToShow['centralChannel1ColumnData']),
-                            centralChannel2Column: dataToShow['centralChannel2Column'],
-                            centralChannel2ColumnData: filterDataByPages(data: dataToShow['centralChannel2ColumnData']),
-                            centralChannel3Column: dataToShow['centralChannel3Column'],
-                            centralChannel3ColumnData: filterDataByPages(data: dataToShow['centralChannel3ColumnData']),
-                            centralChannel4Column: dataToShow['centralChannel4Column'],
-                            centralChannel4ColumnData: filterDataByPages(data: dataToShow['centralChannel4ColumnData']),
-                            centralChannel5Column: dataToShow['centralChannel5Column'],
-                            centralChannel5ColumnData: filterDataByPages(data: dataToShow['centralChannel5ColumnData']),
-                            centralChannel6Column: dataToShow['centralChannel6Column'],
-                            centralChannel6ColumnData: filterDataByPages(data: dataToShow['centralChannel6ColumnData']),
-                            centralChannel7Column: dataToShow['centralChannel7Column'],
-                            centralChannel7ColumnData: filterDataByPages(data: dataToShow['centralChannel7ColumnData']),
-                            centralChannel8Column: dataToShow['centralChannel8Column'],
-                            centralChannel8ColumnData: filterDataByPages(data: dataToShow['centralChannel8ColumnData']),
-                            localEcPhColumn: dataToShow['localEcPhColumn'],
-                            localEcPhColumnData: filterDataByPages(data: dataToShow['localEcPhColumnData']),
-                            localChannel1Column: dataToShow['localChannel1Column'],
-                            localChannel1ColumnData: filterDataByPages(data: dataToShow['localChannel1ColumnData']),
-                            localChannel2Column: dataToShow['localChannel2Column'],
-                            localChannel2ColumnData: filterDataByPages(data: dataToShow['localChannel2ColumnData']),
-                            localChannel3Column: dataToShow['localChannel3Column'],
-                            localChannel3ColumnData: filterDataByPages(data: dataToShow['localChannel3ColumnData']),
-                            localChannel4Column: dataToShow['localChannel4Column'],
-                            localChannel4ColumnData: filterDataByPages(data: dataToShow['localChannel4ColumnData']),
-                            localChannel5Column: dataToShow['localChannel5Column'],
-                            localChannel5ColumnData: filterDataByPages(data: dataToShow['localChannel5ColumnData']),
-                            localChannel6Column: dataToShow['localChannel6Column'],
-                            localChannel6ColumnData: filterDataByPages(data: dataToShow['localChannel6ColumnData']),
-                            localChannel7Column: dataToShow['localChannel7Column'],
-                            localChannel7ColumnData: filterDataByPages(data: dataToShow['localChannel7ColumnData']),
-                            localChannel8Column: dataToShow['localChannel8Column'],
-                            localChannel8ColumnData: filterDataByPages(data: dataToShow['localChannel8ColumnData']),
+                if((dataSource == null || dataToShow.isEmpty))
+                  Expanded(child: Center(child: Text('There is no data in ${_selectedDate}'))),
+                if((dataSource != null || dataToShow.isNotEmpty))
+                  if(graphMode == false)
+                    Expanded(
+                      child: Column(
+                        children: [
+                          if(dataToShow.isNotEmpty)
+                            ScrollingTable(
+                              fixedColumn: dataToShow['fixedColumn'],
+                              fixedColumnData: filterDataByPages(data: dataToShow['fixedColumnData']),
+                              generalColumn: dataToShow['generalColumn'],
+                              generalColumnData: filterDataByPages(data: dataToShow['generalColumnData']),
+                              waterColumn: dataToShow['waterColumn'],
+                              waterColumnData: filterDataByPages(data: dataToShow['waterColumnData']),
+                              filterColumn: dataToShow['filterColumn'],
+                              filterColumnData: filterDataByPages(data: dataToShow['filterColumnData']),
+                              prePostColumn: dataToShow['prePostColumn'],
+                              prePostColumnData: filterDataByPages(data: dataToShow['prePostColumnData']),
+                              centralEcPhColumn: dataToShow['centralEcPhColumn'],
+                              centralEcPhColumnData: filterDataByPages(data: dataToShow['centralEcPhColumnData']),
+                              centralChannel1Column: dataToShow['centralChannel1Column'],
+                              centralChannel1ColumnData: filterDataByPages(data: dataToShow['centralChannel1ColumnData']),
+                              centralChannel2Column: dataToShow['centralChannel2Column'],
+                              centralChannel2ColumnData: filterDataByPages(data: dataToShow['centralChannel2ColumnData']),
+                              centralChannel3Column: dataToShow['centralChannel3Column'],
+                              centralChannel3ColumnData: filterDataByPages(data: dataToShow['centralChannel3ColumnData']),
+                              centralChannel4Column: dataToShow['centralChannel4Column'],
+                              centralChannel4ColumnData: filterDataByPages(data: dataToShow['centralChannel4ColumnData']),
+                              centralChannel5Column: dataToShow['centralChannel5Column'],
+                              centralChannel5ColumnData: filterDataByPages(data: dataToShow['centralChannel5ColumnData']),
+                              centralChannel6Column: dataToShow['centralChannel6Column'],
+                              centralChannel6ColumnData: filterDataByPages(data: dataToShow['centralChannel6ColumnData']),
+                              centralChannel7Column: dataToShow['centralChannel7Column'],
+                              centralChannel7ColumnData: filterDataByPages(data: dataToShow['centralChannel7ColumnData']),
+                              centralChannel8Column: dataToShow['centralChannel8Column'],
+                              centralChannel8ColumnData: filterDataByPages(data: dataToShow['centralChannel8ColumnData']),
+                              localEcPhColumn: dataToShow['localEcPhColumn'],
+                              localEcPhColumnData: filterDataByPages(data: dataToShow['localEcPhColumnData']),
+                              localChannel1Column: dataToShow['localChannel1Column'],
+                              localChannel1ColumnData: filterDataByPages(data: dataToShow['localChannel1ColumnData']),
+                              localChannel2Column: dataToShow['localChannel2Column'],
+                              localChannel2ColumnData: filterDataByPages(data: dataToShow['localChannel2ColumnData']),
+                              localChannel3Column: dataToShow['localChannel3Column'],
+                              localChannel3ColumnData: filterDataByPages(data: dataToShow['localChannel3ColumnData']),
+                              localChannel4Column: dataToShow['localChannel4Column'],
+                              localChannel4ColumnData: filterDataByPages(data: dataToShow['localChannel4ColumnData']),
+                              localChannel5Column: dataToShow['localChannel5Column'],
+                              localChannel5ColumnData: filterDataByPages(data: dataToShow['localChannel5ColumnData']),
+                              localChannel6Column: dataToShow['localChannel6Column'],
+                              localChannel6ColumnData: filterDataByPages(data: dataToShow['localChannel6ColumnData']),
+                              localChannel7Column: dataToShow['localChannel7Column'],
+                              localChannel7ColumnData: filterDataByPages(data: dataToShow['localChannel7ColumnData']),
+                              localChannel8Column: dataToShow['localChannel8Column'],
+                              localChannel8ColumnData: filterDataByPages(data: dataToShow['localChannel8ColumnData']),
 
-                          ),
-                      ],
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: Scrollbar(
-                      controller: _graphController,
-                      thickness: 20,
-                      interactive: true,
-                      radius: Radius.circular(50),
-                      child: SingleChildScrollView(
+                            ),
+                        ],
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: Scrollbar(
                         controller: _graphController,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
+                        thickness: 20,
+                        interactive: true,
+                        radius: Radius.circular(50),
+                        child: SingleChildScrollView(
+                          controller: _graphController,
                           child: Column(
                             children: [
-                              if(graphMode == true)
-                                if(dataToShow.isNotEmpty)
-                                  for(var i in dataToShow['graphData'])
-                                    Container(
-                                      padding: EdgeInsets.all(20),
-                                      decoration: BoxDecoration(
-                                          boxShadow: customBoxShadow,
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(20)
-                                      ),
-                                      margin: EdgeInsets.symmetric(vertical: 20),
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 250,
-                                      child: Column(
-                                        children: [
-                                          Text('${i['name']}'),
-                                          Expanded(
-                                              child: SfCartesianChart(
-                                                enableAxisAnimation: false,
-                                                plotAreaBackgroundColor: Colors.transparent,
-                                                borderColor: Colors.transparent,
-                                                borderWidth: 0,
-                                                // isTransposed: chartDataList!.length <= 3,
-                                                plotAreaBorderWidth: 0,
-                                                enableSideBySideSeriesPlacement: false,
-                                                onTooltipRender: (TooltipArgs args) {
-                                                  // String sequence = args.pointIndex != null && args.pointIndex! < chartDataList!.length
-                                                  //     ? chartDataList![args.pointIndex!.toInt()].valves
-                                                  //     : '';
-                                                  // double? preValue = args.pointIndex != null && args.pointIndex! < chartDataList!.length
-                                                  //     ? (chartDataList![args.pointIndex!.toInt()].preValueHigh.toDouble() - chartDataList![args.pointIndex!.toInt()].preValueLow.toDouble())
-                                                  //     : null;
-                                                  // double? postValue = args.pointIndex != null && args.pointIndex! < chartDataList!.length
-                                                  //     ? (chartDataList![args.pointIndex!.toInt()].postValueHigh.toDouble() - chartDataList![args.pointIndex!.toInt()].postValueLow.toDouble())
-                                                  //     : null;
-                                                  // double? waterValue = args.pointIndex != null && args.pointIndex! < chartDataList!.length
-                                                  //     ? (chartDataList![args.pointIndex!.toInt()].waterValueHigh.toDouble() - chartDataList![args.pointIndex!.toInt()].waterValueLow.toDouble())
-                                                  //     : null;
-                                                  // args.text = 'Sequence: $sequence, \nPre value: $preValue, \nPost value: $postValue, \nWater value: $waterValue';
-                                                },
-                                                tooltipBehavior: TooltipBehavior(
-                                                  enable: true,
-                                                  animationDuration: 0,
-                                                  canShowMarker: true,
-                                                  // format: 'point.x',
-                                                  textStyle: const TextStyle(color: Colors.white),
-                                                  tooltipPosition: TooltipPosition.pointer,
-                                                  // borderColor: Colors.red,
-                                                  borderWidth: 2,
-                                                  color: Colors.black,
-                                                  // You can customize more tooltip settings here
-                                                ),
-                                                primaryXAxis: CategoryAxis(
-                                                  isVisible: true,
-                                                  // title: AxisTitle(text: "Sequence"),
-                                                  rangePadding: ChartRangePadding.round,
-                                                  labelPlacement: LabelPlacement.onTicks,
-                                                  maximumLabels: i['data'].length,
-                                                  minimum: -0.5,
-                                                  maximum: (i['data']).length.toDouble(),
-                                                  visibleMinimum: -0.5,
-                                                  visibleMaximum: (i['data'])!.length <= 3 ? (i['data'])!.length.toDouble() - 0.5 : 3,
-                                                ),
-                                                primaryYAxis: NumericAxis(
-                                                  isVisible: true,
-                                                  // title: AxisTitle(text: "Dur/Qty"),
-                                                  minimum: 0,
-                                                ),
-                                                zoomPanBehavior: ZoomPanBehavior(
-                                                  enablePanning: true,
-                                                ),
-                                                series: <CartesianSeries>[
-                                                  RangeColumnSeries<dynamic, String>(
-                                                      borderRadius: BorderRadius.zero,
-                                                      dataSource: (i['data']) ?? [],
-                                                      width: 0.4,
-                                                      color: Colors.blue.shade200,
-                                                      xValueMapper: (dynamic data, _) => "${data.seqName}",
-                                                      highValueMapper: (dynamic data, _) => data.preFrom,
-                                                      lowValueMapper: (dynamic data, _) => data.preTo
-                                                  ),
-                                                  RangeColumnSeries<dynamic, String>(
-                                                      borderRadius: BorderRadius.circular(0),
-                                                      dataSource: (i['data']) ?? [],
-                                                      width: 0.4,
-                                                      color: Colors.greenAccent,
-                                                      xValueMapper: (dynamic data, _) => "${data.seqName}",
-                                                      highValueMapper: (dynamic data, _) => data.actualFrom,
-                                                      lowValueMapper: (dynamic data, _) => data.actualTo
-                                                  ),
-                                                  RangeColumnSeries<dynamic, String>(
-                                                      borderRadius: BorderRadius.circular(0),
-                                                      dataSource: (i['data']) ?? [],
-                                                      width: 0.4,
-                                                      color: Colors.blue.shade400,
-                                                      xValueMapper: (dynamic data, _) => "${data.seqName}",
-                                                      highValueMapper: (dynamic data, _) => data.postFrom,
-                                                      lowValueMapper: (dynamic data, _) => data.postTo
-                                                  ),
-                                                  RangeColumnSeries<dynamic, String>(
-                                                      borderRadius: BorderRadius.circular(0),
-                                                      dataSource: (i['data']) ?? [],
-                                                      width: 0.4,
-                                                      color: Colors.grey.shade300,
-                                                      xValueMapper: (dynamic data, _) => "${data.seqName}",
-                                                      highValueMapper: (dynamic data, _) => data.plannedFrom,
-                                                      lowValueMapper: (dynamic data, _) => data.plannedTo
-                                                  ),
-                                                ],
+                              Wrap(
+                                runSpacing: 10,
+                                children: [
+                                  if(graphMode == true)
+                                    if(dataToShow.isNotEmpty)
+                                      for(var i in dataToShow['graphData'])
+                                        Container(
+                                          padding: EdgeInsets.all(8),
+                                          margin: EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                              boxShadow: customBoxShadow,
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(20)
+                                          ),
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 250,
+                                          child: Column(
+                                            children: [
+                                              Text('${i['name']}'),
+                                              Expanded(
+                                                  child: SfCartesianChart(
+                                                    enableAxisAnimation: false,
+                                                    plotAreaBackgroundColor: Colors.transparent,
+                                                    borderColor: Colors.transparent,
+                                                    borderWidth: 0,
+                                                    // isTransposed: chartDataList!.length <= 3,
+                                                    plotAreaBorderWidth: 0,
+                                                    enableSideBySideSeriesPlacement: false,
+                                                    onTooltipRender: (TooltipArgs args) {
+                                                      // String sequence = args.pointIndex != null && args.pointIndex! < chartDataList!.length
+                                                      //     ? chartDataList![args.pointIndex!.toInt()].valves
+                                                      //     : '';
+                                                      // double? preValue = args.pointIndex != null && args.pointIndex! < chartDataList!.length
+                                                      //     ? (chartDataList![args.pointIndex!.toInt()].preValueHigh.toDouble() - chartDataList![args.pointIndex!.toInt()].preValueLow.toDouble())
+                                                      //     : null;
+                                                      // double? postValue = args.pointIndex != null && args.pointIndex! < chartDataList!.length
+                                                      //     ? (chartDataList![args.pointIndex!.toInt()].postValueHigh.toDouble() - chartDataList![args.pointIndex!.toInt()].postValueLow.toDouble())
+                                                      //     : null;
+                                                      // double? waterValue = args.pointIndex != null && args.pointIndex! < chartDataList!.length
+                                                      //     ? (chartDataList![args.pointIndex!.toInt()].waterValueHigh.toDouble() - chartDataList![args.pointIndex!.toInt()].waterValueLow.toDouble())
+                                                      //     : null;
+                                                      // args.text = 'Sequence: $sequence, \nPre value: $preValue, \nPost value: $postValue, \nWater value: $waterValue';
+                                                    },
+                                                    tooltipBehavior: TooltipBehavior(
+                                                      enable: true,
+                                                      animationDuration: 0,
+                                                      canShowMarker: true,
+                                                      // format: 'point.x',
+                                                      textStyle: const TextStyle(color: Colors.white),
+                                                      tooltipPosition: TooltipPosition.pointer,
+                                                      // borderColor: Colors.red,
+                                                      borderWidth: 2,
+                                                      color: Colors.black,
+                                                      // You can customize more tooltip settings here
+                                                    ),
+                                                    primaryXAxis: CategoryAxis(
+                                                      isVisible: true,
+                                                      // title: AxisTitle(text: "Sequence"),
+                                                      rangePadding: ChartRangePadding.round,
+                                                      labelPlacement: LabelPlacement.onTicks,
+                                                      maximumLabels: i['data'].length,
+                                                      minimum: -0.5,
+                                                      maximum: (i['data']).length.toDouble(),
+                                                      visibleMinimum: -0.5,
+                                                      visibleMaximum: (i['data'])!.length <= 3 ? (i['data'])!.length.toDouble() - 0.5 : 3,
+                                                    ),
+                                                    primaryYAxis: NumericAxis(
+                                                      isVisible: true,
+                                                      // title: AxisTitle(text: "Dur/Qty"),
+                                                      minimum: 0,
+                                                    ),
+                                                    zoomPanBehavior: ZoomPanBehavior(
+                                                      enablePanning: true,
+                                                    ),
+                                                    series: <CartesianSeries>[
+                                                      RangeColumnSeries<dynamic, String>(
+                                                          borderRadius: BorderRadius.zero,
+                                                          dataSource: (i['data']) ?? [],
+                                                          width: 0.4,
+                                                          color: Colors.blue.shade200,
+                                                          xValueMapper: (dynamic data, _) => "${data.seqName}",
+                                                          highValueMapper: (dynamic data, _) => data.preFrom,
+                                                          lowValueMapper: (dynamic data, _) => data.preTo
+                                                      ),
+                                                      RangeColumnSeries<dynamic, String>(
+                                                          borderRadius: BorderRadius.circular(0),
+                                                          dataSource: (i['data']) ?? [],
+                                                          width: 0.4,
+                                                          color: Colors.greenAccent,
+                                                          xValueMapper: (dynamic data, _) => "${data.seqName}",
+                                                          highValueMapper: (dynamic data, _) => data.actualFrom,
+                                                          lowValueMapper: (dynamic data, _) => data.actualTo
+                                                      ),
+                                                      RangeColumnSeries<dynamic, String>(
+                                                          borderRadius: BorderRadius.circular(0),
+                                                          dataSource: (i['data']) ?? [],
+                                                          width: 0.4,
+                                                          color: Colors.blue.shade400,
+                                                          xValueMapper: (dynamic data, _) => "${data.seqName}",
+                                                          highValueMapper: (dynamic data, _) => data.postFrom,
+                                                          lowValueMapper: (dynamic data, _) => data.postTo
+                                                      ),
+                                                      RangeColumnSeries<dynamic, String>(
+                                                          borderRadius: BorderRadius.circular(0),
+                                                          dataSource: (i['data']) ?? [],
+                                                          width: 0.4,
+                                                          color: Colors.grey.shade300,
+                                                          xValueMapper: (dynamic data, _) => "${data.seqName}",
+                                                          highValueMapper: (dynamic data, _) => data.plannedFrom,
+                                                          lowValueMapper: (dynamic data, _) => data.plannedTo
+                                                      ),
+                                                    ],
+                                                  )
                                               )
-                                          )
-                                        ],
-                                      ),
-                                    )
+                                            ],
+                                          ),
+                                        )
+                                ],
+                              )
 
                             ],
                           ),
                         ),
                       ),
                     ),
-                  ),
                 Container(
                   color: Color(0xff1C7C8A),
                   width: MediaQuery.of(context).size.width,
@@ -1108,7 +1113,7 @@ class _LogHomeState extends State<LogHome> {
                         getData();
                       }
                     },
-                    child: httpError != 2 ? Text('RETRY',style: TextStyle(color: Colors.white),) : loadingButton(),
+                    child: httpError != 2 ? Text('RETRY',style: TextStyle(color: Colors.white),) : loadingButtuon(),
                     color: Colors.blueGrey,
                   ),
                 ],
@@ -1582,6 +1587,8 @@ class _LogHomeState extends State<LogHome> {
       );
 }
 
+
+
 Future<void> generateExcel(data,name, context) async {
   var excel = Excel.createExcel();
   Sheet sheetObject = excel['Logs'];
@@ -1816,3 +1823,18 @@ double convertTimeStringToHours(String timeString) {
   return totalHours;
 }
 TextStyle headingStyleInSheet = TextStyle(fontSize: 14,fontWeight: FontWeight.bold);
+
+Widget loadingButtuon(){
+  return SizedBox(
+    width: 20,
+    height: 20,
+    child: LoadingIndicator(
+      colors: [
+        Colors.white,
+        Colors.white,
+      ],
+      indicatorType: Indicator.ballPulse,
+    ),
+  );
+}
+

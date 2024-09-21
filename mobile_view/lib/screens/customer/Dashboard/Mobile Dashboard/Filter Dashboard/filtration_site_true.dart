@@ -38,7 +38,7 @@ class _FiltrationSiteTrueState extends State<FiltrationSiteTrue> with SingleTick
   @override
   void dispose() {
     _controller.dispose();
-    print('filter site true dispose');
+    // print('filter site true dispose');
     // TODO: implement dispose
     super.dispose();
   }
@@ -153,36 +153,38 @@ class _FiltrationSiteTrueState extends State<FiltrationSiteTrue> with SingleTick
                           ),
                         ),
 
-                        Positioned(
-                          top: 0,
-                          left: 10,
-                          child: Container(
-                            width: 150,
-                            height: (20 * getTextScaleFactor(context)).toDouble(),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: Color(0xff3A96D2)
-                            ),
-                            child: Center(
-                                child: Text('Pressure In : ${site[widget.siteIndex]['PrsIn']}',style: TextStyle(color: Colors.white,fontSize: 12),)
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 10,
-                          child: Container(
-                            width: 150,
-                            height: (20 * getTextScaleFactor(context)).toDouble(),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: Color(0xff3A96D2)
-                            ),
-                            child: Center(
-                                child: Text('Pressure Out : ${site[widget.siteIndex]['PrsOut']}',style: TextStyle(color: Colors.white,fontSize: 12),)
+                        if(site[widget.siteIndex]['PrsIn'] != '-')
+                          Positioned(
+                            top: 0,
+                            left: 10,
+                            child: Container(
+                              width: 150,
+                              height: (20 * getTextScaleFactor(context)).toDouble(),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Color(0xff3A96D2)
+                              ),
+                              child: Center(
+                                  child: Text('Pressure In : ${site[widget.siteIndex]['PrsIn']}',style: TextStyle(color: Colors.white,fontSize: 12),)
+                              ),
                             ),
                           ),
-                        ) ,
+                        if(site[widget.siteIndex]['PrsOut'] != '-')
+                          Positioned(
+                            bottom: 0,
+                            left: 10,
+                            child: Container(
+                              width: 150,
+                              height: (20 * getTextScaleFactor(context)).toDouble(),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Color(0xff3A96D2)
+                              ),
+                              child: Center(
+                                  child: Text('Pressure Out : ${site[widget.siteIndex]['PrsOut']}',style: TextStyle(color: Colors.white,fontSize: 12),)
+                              ),
+                            ),
+                          ) ,
                       ],
                     ),
                   ),

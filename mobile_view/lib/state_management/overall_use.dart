@@ -16,6 +16,7 @@ class OverAllUse extends ChangeNotifier{
   int controllerId = 0;
   int controllerType = 0;
   int customerId = 0;
+  int dealerId = 0;
   String imeiNo = '';
   bool fromDealer = false;
 

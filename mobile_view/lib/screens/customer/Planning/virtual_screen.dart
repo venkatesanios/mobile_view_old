@@ -123,7 +123,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
     } else {
       return Scaffold(
         backgroundColor: const Color(0xffE6EDF5),
-        appBar: AppBar(title: Text('Virtual Screen'),),
+        appBar: AppBar(title: Text('Virtual Screen'),automaticallyImplyLeading: false,),
          body: Column(
           children: [
             Expanded(
@@ -1000,22 +1000,23 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
 
   updateconditions() async {
     var overAllPvd = Provider.of<OverAllUse>(context,listen: false);
-
+    initializeData();
+    var mqttpaylod = toMqttformat(jsondata['virtualWaterMeter']);
+    Map<String, dynamic> payLoadFinal = {
+      "1500": [
+        {"1501": mqttpaylod},
+      ]
+    };
     if (jsondata['waterMeter'].length > 0) {
       Map<String, Object> body = {
         "userId": overAllPvd.userId,
         "controllerId": overAllPvd.controllerId,
         "virtualWaterMeter": jsondata,
+        "hardware": payLoadFinal,
         "createUser": overAllPvd.userId
       };
 
-         initializeData();
-        var mqttpaylod = toMqttformat(jsondata['virtualWaterMeter']);
-        Map<String, dynamic> payLoadFinal = {
-          "1500": [
-            {"1501": mqttpaylod},
-          ]
-        };
+
          if (MQTTManager().isConnected == true) {
           await validatePayloadSent(
               dialogContext: context,

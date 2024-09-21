@@ -55,6 +55,7 @@ class MQTTManager {
     if (!isConnected) {
       try {
         print('Mosquitto start client connecting....');
+        await Future.delayed(Duration.zero);
         providerState?.setAppConnectionState(MQTTConnectionState.connecting);
         await _client!.connect();
         _client?.updates!.listen(_onMessageReceived);
@@ -86,18 +87,9 @@ class MQTTManager {
     providerState?.updateReceivedPayload(pt,false);
   }
   void subscribeToTopic(String topic) async {
-    print('Trying to subscribe to ${topic}');
-    print('isConnected: ${isConnected}');
-
-    if (_subscribedTopics.contains(topic)) {
-      print('Already subscribed to ${topic}');
-      return; // Avoid resubscribing
-    }
-
     if (isConnected) {
-      print("Connected, subscribing to ${topic}");
       _client?.subscribe(topic, MqttQos.atLeastOnce);
-      _subscribedTopics.add(topic); // Track the subscribed topic
+      print("topic Subscribe :::: ${topic}");
     } else {
       Future.delayed(Duration(seconds: 1), () {
         subscribeToTopic(topic);
@@ -146,8 +138,9 @@ class MQTTManager {
       providerState!.editSubscribeTopic(subscribeTopic);
       providerState!.editPublishTopic(publishTopic);
       providerState!.editPublishMessage(publishMessage);
-      _subscribedTopics.remove(unSubscribeTopic); // Track the subscribed topic
-      // _client!.unsubscribe(unSubscribeTopic);
+      subscribeToTopic(subscribeTopic);
+      _client!.unsubscribe(unSubscribeTopic);
+      print('topic unSubscribe ::::  $unSubscribeTopic');
     }else{
       Future.delayed(Duration(seconds: 1),(){
         unSubscribe(
@@ -185,6 +178,7 @@ class MQTTManager {
       if (_client!.connectionStatus!.returnCode == MqttConnectReturnCode.noneSpecified) {
         print('OnDisconnected callback is solicited, this is correct');
       }
+      await Future.delayed(Duration.zero);
       providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
       connect();
     }catch(e){
@@ -198,8 +192,9 @@ class MQTTManager {
     });*/
   }
 
-  void onConnected() {
+  void onConnected() async{
     assert(isConnected);
+    await Future.delayed(Duration.zero);
     providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
   }

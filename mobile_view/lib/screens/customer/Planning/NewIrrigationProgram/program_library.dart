@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_view/screens/Customer/Planning/NewIrrigationProgram/schedule_screen.dart';
 
 import 'package:provider/provider.dart';
 import '../../../../ListOfFertilizerInSet.dart';
@@ -15,6 +16,7 @@ import '../../../../widget/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../../widget/SCustomWidgets/custom_list_tile.dart';
 import '../../../../widget/SCustomWidgets/custom_snack_bar.dart';
 import '../../ScheduleView.dart';
+import 'conditions_screen.dart';
 import 'irrigation_program_main.dart';
 
 class ProgramLibraryScreenNew extends StatefulWidget {
@@ -67,7 +69,7 @@ class _ProgramLibraryScreenNewState extends State<ProgramLibraryScreenNew> {
       statusBarIconBrightness: Brightness.dark,
     ));
 
-    print("build function called");
+    // print("build function called");
     return Scaffold(
       backgroundColor: const Color(0xffF9FEFF),
       appBar: MediaQuery.of(context).size.width < 550 ?
@@ -433,7 +435,7 @@ class _ProgramLibraryScreenNewState extends State<ProgramLibraryScreenNew> {
                                 });
                               }
                             });
-                            await saveProgramDetails(programItem);
+                            await saveProgramDetails(programItem, dataToMqtt);
                             await Future.delayed(const Duration(seconds: 2), () async{
                               await irrigationProgramMainProvider.programLibraryData(overAllUse.userId, overAllUse.controllerId,);
                             });
@@ -775,28 +777,28 @@ class _ProgramLibraryScreenNewState extends State<ProgramLibraryScreenNew> {
                             : program.defaultProgramName,
                         focusNode: _programNameFocusNode,
                         onChanged: (newValue) => program.programName = newValue,
-                        inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(20),
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+                        ],
                       ),
                       const SizedBox(height: 5),
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15)),
-                        child: CustomDropdownTile(
-                          showCircleAvatar: false,
-                          width: 70,
-                          title: 'Priority',
-                          subtitle: 'Description',
-                          showSubTitle: false,
-                          content: Icons.priority_high,
-                          dropdownItems: irrigationProgramMainProvider.priorityList.map((item) => item).toList(),
-                          selectedValue: program.priority,
-                          onChanged: (newValue) {
-                            irrigationProgramMainProvider.updatePriority(newValue, index);
-                            _programNameFocusNode.unfocus();
-                          },
-                          includeNoneOption: false,
-                        ),
+                      buildListTile(
+                        padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.width > 1200 ? 8 : 0),
+                        context: context,
+                        title: 'Priority',
+                        subTitle:'Prioritize the program to run',
+                        textColor: Colors.black,
+                        icon: Icons.priority_high,
+                        trailing: [
+                          buildPopUpMenuButton(
+                              context: context,
+                              dataList: irrigationProgramMainProvider.priorityList.map((item) => item).toList(),
+                              onSelected: (newValue) => irrigationProgramMainProvider.updateProgramName(newValue, 'priority'),
+                              selected: irrigationProgramMainProvider.priority,
+                              child: Text(irrigationProgramMainProvider.priority, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize),)
+                          ),
+                        ][index],
                       ),
                     ],
                   ),
@@ -841,7 +843,7 @@ class _ProgramLibraryScreenNewState extends State<ProgramLibraryScreenNew> {
                               });
                             }
                           });
-                          await saveProgramDetails(program);
+                          await saveProgramDetails(program, dataToMqtt);
                           await Future.delayed(const Duration(seconds: 2), () async{
                             await irrigationProgramMainProvider.programLibraryData(overAllUse.userId, overAllUse.controllerId);
                           });
@@ -859,7 +861,7 @@ class _ProgramLibraryScreenNewState extends State<ProgramLibraryScreenNew> {
     );
   }
 
-  Future<void> saveProgramDetails(Program program) async{
+  Future<void> saveProgramDetails(Program program, hardwareData) async{
     irrigationProgramMainProvider
         .updateUserProgramDetails(
         overAllUse.userId,
@@ -869,7 +871,7 @@ class _ProgramLibraryScreenNewState extends State<ProgramLibraryScreenNew> {
         program.programName,
         program.priority,
         program.defaultProgramName,
-        controllerReadStatus)
+        controllerReadStatus, hardwareData)
         .then((value) => ScaffoldMessenger.of(context)
         .showSnackBar(CustomSnackBar(message: value)));
   }

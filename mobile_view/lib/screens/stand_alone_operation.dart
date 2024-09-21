@@ -703,24 +703,11 @@ class _ManualOperationScreenState extends State<ManualOperationScreen> with Tick
     }
     // print('selectedValves : ${selectedValves}');
     selectedData['selected'].addAll(selectedValves);
+    // print("selectedData ==> $selectedData");
     for(var element in selectedData['selected']) {
       sNoList.add(element['sNo'].toString());
     }
     // print(selectedData['selected']);
-    final body = {
-      "userId": widget.userId,
-      "controllerId": widget.controllerId,
-      "serialNumber": selectedSerialNumber,
-      "programName": selectedMode,
-      // "startFlag": "2",
-      "startFlag": manualOperationData.startFlag,
-      "method": manualOperationData.method,
-      "duration": manualOperationData.time,
-      "flow": manualOperationData.flow,
-      "selection": manualOperationData.startFlag == 1 ? selectedData['selected'] : [],
-      // "manualOperation": manualOperationDataToSend,
-      "createUser": widget.userId
-    };
     final manualModePayload = {
       "800": [
         {
@@ -893,6 +880,22 @@ class _ManualOperationScreenState extends State<ManualOperationScreen> with Tick
         }
       ]
     };
+    final body = {
+      "userId": widget.userId,
+      "controllerId": widget.controllerId,
+      "serialNumber": selectedSerialNumber,
+      "programName": selectedMode,
+      // "startFlag": "2",
+      "startFlag": manualOperationData.startFlag,
+      "method": manualOperationData.method,
+      "duration": manualOperationData.time,
+      "flow": manualOperationData.flow,
+      "selection": manualOperationData.startFlag == 1 ? selectedData['selected'] : [],
+      "fromDashboard": false,
+      "hardware": selectedMode == "Manual" ? manualModePayload : programModePayload,
+      // "manualOperation": manualOperationDataToSend,
+      "createUser": widget.userId
+    };
     // print("programModePayload ==> $programModePayload");
     if(selectedData['selected'].isNotEmpty) {
       mqttPayloadProvider.messageFromHw = null;
@@ -913,12 +916,16 @@ class _ManualOperationScreenState extends State<ManualOperationScreen> with Tick
             final createUserProgram = await HttpService().postRequest('createUserManualOperation', body);
             // print("body while send ==> $body");
             final response = jsonDecode(createUserProgram.body);
+            // print("response ==> $response");
             Future.delayed(Duration.zero, () {
               if(createUserProgram.statusCode == 200) {
                 ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
               }
             });
             Navigator.of(context).pop();
+          }
+          else {
+            print("error");
           }
         });
       } catch (error) {

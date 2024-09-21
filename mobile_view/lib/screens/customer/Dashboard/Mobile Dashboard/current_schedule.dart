@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../../state_management/overall_use.dart';
+import 'dashboard_payload_handler.dart';
 import 'home_page.dart';
 
 class CurrentScheduleForMobile extends StatefulWidget {
@@ -96,110 +97,133 @@ class _CurrentScheduleForMobileState extends State<CurrentScheduleForMobile> {
                           fontSize: 15.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.black
-                      ),),
+                      ),
+                      ),
                       title: Text('Start time'),
                       trailing: IntrinsicWidth(
                         child: (payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['Message'] == 'Running.' || payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone'))
                             ? InkWell(
-                          onTap: ()async{
-                            if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['standaloneLoading'] == null){
-                              if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('Manual')){
-                                String payload = '0,0,0,0';
-                                String payLoadFinal = jsonEncode({
-                                  "800": [{"801": payload}]
-                                });
-                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${overAllPvd.imeiNo}');
-                                Map<String, dynamic> manualOperation = {
-                                  "method": 1,
-                                  "time": '00:00',
-                                  "flow": '0',
-                                  "selected": [],
-                                };
-                                try {
-                                  final body = {"userId": overAllPvd.userId, "controllerId": overAllPvd.controllerId, "manualOperation": manualOperation, "createUser": overAllPvd.userId};
-                                  final response = await HttpService().postRequest("createUserManualOperation", body);
-                                  if (response.statusCode == 200) {
-                                    final jsonResponse = json.decode(response.body);
-                                  }
-                                } catch (e) {
-                                  print('Error: $e');
-                                }
-                              }
-                              else if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone')){
-                                var programInfo = payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule];
-                                final programModePayload = {
-                                  "3900": [
-                                    {
-                                      "3901":
-                                      "${0},"
-                                          "${programInfo['ProgCategory']},"
-                                          "${programInfo['ProgramS_No']},"
-                                          "${programInfo['ZoneS_No']},"
-                                          ","
-                                          ","
-                                          ","
-                                          ","
-                                          ","
-                                          ","
-                                          ","
-                                          ","
-                                          "${0},"
-                                          ""
-                                    },
-                                    {
-                                      "3902": "${overAllPvd.getUserId()}"
-                                    }
-                                  ]
-                                };
-                                MQTTManager().publish(jsonEncode(programModePayload), 'AppToFirmware/${overAllPvd.imeiNo}');
-                                Map<String, dynamic> manualOperation = {
-                                  "programName": payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].split('StandAlone - ')[1],
-                                  "programId": payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgramS_No'],
-                                  "startFlag":0,
-                                  "method": 1,
-                                  "time": '00:00:00',
-                                  "flow": '0',
-                                  "selected": [],
-                                };
-                                try {
-                                  final body = {"userId": overAllPvd.userId, "controllerId": overAllPvd.controllerId, "manualOperation": manualOperation, "createUser": overAllPvd.userId};
-                                  final response = await HttpService().postRequest("createUserManualOperation", body);
-                                  if (response.statusCode == 200) {
-                                    final jsonResponse = json.decode(response.body);
-                                  }
-                                } catch (e) {
-                                  print('Error: $e');
-                                }
-                              }
-                              else{
-                                String payload = '${payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ScheduleS_No']},0';
-                                String payLoadFinal = jsonEncode({
-                                  "3700": [{"3701": payload},{
-                                    "3702": "${overAllPvd.getUserId()}"
-                                  }]
-                                });
-                                widget.manager.publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                              }
-                              setState(() {
-                                payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['standaloneLoading'] = true;
-                                payloadProvider.messageFromHw = '';
-                              });
-                              for(var seconds = 0;seconds < 8;seconds++){
-                                await Future.delayed(Duration(seconds: 1));
-                                if(payloadProvider.messageFromHw != ''){
-                                  stayAlert(context: context, payloadProvider: payloadProvider,message: 'Hardware recieved successfully');
-                                  break;
-                                }
-                                if(seconds == 7){
-                                  setState(() {
-                                    payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule].remove('standaloneLoading');
-                                  });
-                                }
-                              }
-                            }
-
-
-                          },
+                          onTap: DashboardPayloadHandler(manager: widget.manager, payloadProvider: payloadProvider, overAllPvd: overAllPvd, setState: setState, context: context,index: payloadProvider.selectedCurrentSchedule).scheduleSkip,
+                          // onTap: ()async{
+                          //   if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['standaloneLoading'] == null){
+                          //     if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('Manual')){
+                          //       String payload = '0,0,0,0';
+                          //       String payLoadFinal = jsonEncode({
+                          //         "800": [{"801": payload}]
+                          //       });
+                          //       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${overAllPvd.imeiNo}');
+                          //       Map<String, dynamic> manualOperation = {
+                          //         "programName": payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].split('StandAlone - ')[1],
+                          //         "programId": 0,
+                          //         "method": 1,
+                          //         "time": '00:00',
+                          //         "flow": '0',
+                          //         "selected": [],
+                          //         'fromDashboard' : true
+                          //       };
+                          //       try {
+                          //         final body = {"userId": overAllPvd.userId, "controllerId": overAllPvd.controllerId, "manualOperation": manualOperation, "createUser": overAllPvd.userId,'hardware' : jsonDecode(payLoadFinal)};
+                          //         final response = await HttpService().postRequest("createUserManualOperation", body);
+                          //         if (response.statusCode == 200) {
+                          //           final jsonResponse = json.decode(response.body);
+                          //         }
+                          //       } catch (e) {
+                          //         print('Error: $e');
+                          //       }
+                          //     }
+                          //     else if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone')){
+                          //       var programInfo = payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule];
+                          //       final programModePayload = {
+                          //         "3900": [
+                          //           {
+                          //             "3901":
+                          //             "${0},"
+                          //                 "${programInfo['ProgCategory']},"
+                          //                 "${programInfo['ProgramS_No']},"
+                          //                 "${programInfo['ZoneS_No']},"
+                          //                 ","
+                          //                 ","
+                          //                 ","
+                          //                 ","
+                          //                 ","
+                          //                 ","
+                          //                 ","
+                          //                 ","
+                          //                 "${0},"
+                          //                 ""
+                          //           },
+                          //           {
+                          //             "3902": "${overAllPvd.getUserId()}"
+                          //           }
+                          //         ]
+                          //       };
+                          //       MQTTManager().publish(jsonEncode(programModePayload), 'AppToFirmware/${overAllPvd.imeiNo}');
+                          //       Map<String, dynamic> manualOperation = {
+                          //         "programName": payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].split('StandAlone - ')[1],
+                          //         "programId": payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgramS_No'],
+                          //         "startFlag":0,
+                          //         "method": 1,
+                          //         "time": '00:00:00',
+                          //         "flow": '0',
+                          //         "selected": [],
+                          //         'fromDashboard' : true
+                          //       };
+                          //       try {
+                          //         final body = {"userId": overAllPvd.userId, "controllerId": overAllPvd.controllerId, "manualOperation": manualOperation, "createUser": overAllPvd.userId,'hardware' : programModePayload};
+                          //         final response = await HttpService().postRequest("createUserManualOperation", body);
+                          //         if (response.statusCode == 200) {
+                          //           final jsonResponse = json.decode(response.body);
+                          //         }
+                          //       } catch (e) {
+                          //         print('Error: $e');
+                          //       }
+                          //
+                          //     }
+                          //     else{
+                          //       String payload = '${payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ScheduleS_No']},0';
+                          //       String payLoadFinal = jsonEncode({
+                          //         "3700": [{"3701": payload},{
+                          //           "3702": "${overAllPvd.getUserId()}"
+                          //         }]
+                          //       });
+                          //       widget.manager.publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                          //       try {
+                          //         var data = {
+                          //           "userId": overAllPvd.getUserId(),
+                          //           "controllerId": overAllPvd.controllerId,
+                          //           "data": jsonDecode(payLoadFinal),
+                          //           "hardware" : jsonDecode(payLoadFinal),
+                          //           "messageStatus": "${payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ZoneName']} Skip",
+                          //           "createUser": overAllPvd.getUserId()
+                          //         };
+                          //         final response = await HttpService().postRequest("createUserManualOperationInDashboard", data);
+                          //         if (response.statusCode == 200) {
+                          //           final jsonResponse = json.decode(response.body);
+                          //         }
+                          //       } catch (e) {
+                          //         print('Error: $e');
+                          //       }
+                          //     }
+                          //     setState(() {
+                          //       payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['standaloneLoading'] = true;
+                          //       payloadProvider.messageFromHw = '';
+                          //     });
+                          //     for(var seconds = 0;seconds < 8;seconds++){
+                          //       await Future.delayed(Duration(seconds: 1));
+                          //       if(payloadProvider.messageFromHw != ''){
+                          //         stayAlert(context: context, payloadProvider: payloadProvider,message: 'Hardware recieved successfully');
+                          //         break;
+                          //       }
+                          //       if(seconds == 7){
+                          //         setState(() {
+                          //           payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule].remove('standaloneLoading');
+                          //         });
+                          //       }
+                          //     }
+                          //   }
+                          //
+                          //
+                          // },
                           child: Container(
                             decoration: BoxDecoration(
                                 color: Colors.red,
@@ -316,7 +340,7 @@ class _CurrentScheduleForMobileState extends State<CurrentScheduleForMobile> {
                             Column(
                               children: [
                                 Text('Left',style: TextStyle(color: Color(0xffD3054F)),),
-                                if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone - Manual'))
+                                if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone - Manual') && payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgType'] == 3)
                                   Text('- - - - - - -',style: TextStyle(color: Color(0xffD3054F),fontSize: 14,fontWeight: FontWeight.bold))
                                 else
                                   Text(getLeftValue(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['Duration_QtyLeft']),style: TextStyle(color: Color(0xffD3054F),fontSize: 14,fontWeight: FontWeight.bold)),
@@ -325,7 +349,7 @@ class _CurrentScheduleForMobileState extends State<CurrentScheduleForMobile> {
                             Column(
                               children: [
                                 Text('Total'),
-                                if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone - Manual'))
+                                if(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgName'].contains('StandAlone - Manual') && payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['ProgType'] == 3)
                                   Text('TimeLess',style: TextStyle(color: Color(0xffD3054F),fontSize: 14,fontWeight: FontWeight.bold))
                                 else
                                   Text(getLeftValue(payloadProvider.currentSchedule[payloadProvider.selectedCurrentSchedule]['Duration_Qty']),style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),

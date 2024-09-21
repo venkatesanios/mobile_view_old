@@ -53,42 +53,49 @@ class _NewPumpLogScreenState extends State<NewPumpLogScreen> {
       selectedIndex = 0;
       message = "";
       showGraph = false;
-      print(getPumpController.body);
-      print(data);
+      // print(getPumpController.body);
+      // print(data);
       if (getPumpController.statusCode == 200) {
-        setState(() {
-          if (response['data'] is List) {
-            pumpLogData = (response['data'] as List).map((i) => PumpLogData.fromJson(i)).toList();
-            for(var i = 0; i < pumpLogData.length; i++) {
-              if(pumpLogData[i].motor1.isNotEmpty) {
-                segments.addAll({0: "Motor 1"});
+        await Future.delayed(Duration.zero, () {
+          setState(() {
+            if (response['data'] is List) {
+              pumpLogData = (response['data'] as List).map((i) => PumpLogData.fromJson(i)).toList();
+              for(var i = 0; i < pumpLogData.length; i++) {
+                if(pumpLogData[i].motor1.isNotEmpty) {
+                  segments.addAll({0: "Motor 1"});
+                }
+                if(pumpLogData[i].motor2.isNotEmpty) {
+                  segments.addAll({1: "Motor 2"});
+                }
+                if(pumpLogData[i].motor3.isNotEmpty) {
+                  segments.addAll({2: "Motor 3"});
+                }
+                if(pumpLogData[i].motor2.isNotEmpty) {
+                  selectedIndex = 1;
+                } else if(pumpLogData[i].motor3.isNotEmpty) {
+                  selectedIndex = 2;
+                } else {
+                  selectedIndex = 0;
+                }
               }
-              if(pumpLogData[i].motor2.isNotEmpty) {
-                segments.addAll({1: "Motor 2"});
-              }
-              if(pumpLogData[i].motor3.isNotEmpty) {
-                segments.addAll({2: "Motor 3"});
-              }
-              if(pumpLogData[i].motor2.isNotEmpty) {
-                selectedIndex = 1;
-              } else if(pumpLogData[i].motor3.isNotEmpty) {
-                selectedIndex = 2;
-              } else {
-                selectedIndex = 0;
-              }
+            } else {
+              message = '${response['message']}';
+              print('Data is not a List');
             }
-          } else {
-            message = '${response['message']}';
-            print('Data is not a List');
-          }
-          if(pumpLogData.isNotEmpty) {
-            _scrollController.animateTo(
+          });
+        });
+        setState(() {
+          if (pumpLogData.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollController.animateTo(
                 _scrollController.position.maxScrollExtent,
                 duration: Duration(milliseconds: 200),
-                curve: Curves.easeInOut
-            );
+                curve: Curves.easeInOut,
+              );
+            });
           }
         });
+
       } else {
         print('Failed to load data');
       }
@@ -101,7 +108,9 @@ class _NewPumpLogScreenState extends State<NewPumpLogScreen> {
   @override
   void initState() {
     overAllPvd = Provider.of<OverAllUse>(context, listen: false);
-    getUserPumpLog();
+    if(mounted) {
+      getUserPumpLog();
+    }
     super.initState();
   }
 

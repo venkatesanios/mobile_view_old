@@ -23,24 +23,27 @@ class _IrrigationAndPumpLogState extends State<IrrigationAndPumpLog> with Ticker
   late TabController tabController;
   List pumpList = [];
   String message = '';
+  late OverAllUse overAllUse;
 
   @override
   void initState() {
     // TODO: implement initState
     tabController = TabController(length: 3, vsync: this);
+    overAllUse = Provider.of<OverAllUse>(context, listen: false);
     getUserNodePumpList();
     super.initState();
   }
 
   Future<void> getUserNodePumpList() async{
     Map<String, dynamic> userData = {
-      "userId": widget.userId,
-      "controllerId": widget.controllerId
+      "userId": overAllUse.userId,
+      "controllerId": overAllUse.controllerId
     };
 
+    print(userData);
     final result = await HttpService().postRequest('getUserNodePumpList', userData);
     setState(() {
-      if(result.statusCode == 200) {
+      if(result.statusCode == 200 && jsonDecode(result.body)['data'] != null) {
         pumpList = jsonDecode(result.body)['data'];
       } else {
         message = jsonDecode(result.body)['message'];
@@ -58,6 +61,7 @@ class _IrrigationAndPumpLogState extends State<IrrigationAndPumpLog> with Ticker
 
   @override
   Widget build(BuildContext context) {
+    overAllUse = Provider.of<OverAllUse>(context, listen: true);
     return Scaffold(
       body: SafeArea(
           child: DefaultTabController(

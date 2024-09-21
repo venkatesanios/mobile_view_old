@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:mobile_view/screens/Customer/Dashboard/Mobile%20Dashboard/home_screen.dart';
+import 'package:mobile_view/screens/UserChat/user_chat.dart';
 import 'package:mobile_view/state_management/MqttPayloadProvider.dart';
 import 'package:mobile_view/state_management/overall_use.dart';
 import 'package:provider/provider.dart';
@@ -279,34 +280,40 @@ class _DealerDashboardState extends State<DealerDashboard> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            (customer.criticalAlarmCount + customer.serviceRequestCount)>0? BadgeButton(
-                              onPressed: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return  Column(
-                                      children: [
-                                        Container(
-                                          width: MediaQuery.sizeOf(context).width,
-                                          color: Colors.teal.shade100,
-                                          height: 30,
-                                          child: Center(child: Text(customer.userName)),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              icon: Icons.hail,
-                              badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
-                            ):
-                            const SizedBox(),
+                            if((customer.criticalAlarmCount + customer.serviceRequestCount) > 0)
+                              BadgeButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return  Column(
+                                        children: [
+                                          Container(
+                                            width: MediaQuery.sizeOf(context).width,
+                                            color: Colors.teal.shade100,
+                                            height: 30,
+                                            child: Center(child: Text(customer.userName)),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: Icons.hail,
+                                badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
+                              ),
+                            IconButton(
+                                onPressed: (){
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UserChatScreen(userId: customer.userId, dealerId: widget.userId, userName: customer.userName,)));
+                                },
+                                icon: Icon(Icons.chat)
+                            ),
                             IconButton(
                                 onPressed: (){
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(userId: customer.userId, fromDealer: true)));
                                 },
                                 icon: Icon(Icons.space_dashboard)
-                            )
+                            ),
                           ],
                         ),
                         title: Text(customer.userName, style: const TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),

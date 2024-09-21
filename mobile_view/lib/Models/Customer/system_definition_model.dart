@@ -46,7 +46,7 @@ class IrrigationLineSystemData {
   }
 
   String toMqtt() {
-    return "$sNo,$hid,${systemDefinition.toMqtt()},${powerOffRecovery.toMqtt()}";
+    return "$sNo,$hid,${systemDefinition.toMqtt()},${systemDefinition.irrigationLineOn ? 1 : 0}";
   }
 }
 
@@ -55,6 +55,7 @@ class EnergySaveSettings {
   String startDayTime;
   String stopDayTime;
   bool pauseMainLine;
+  bool irrigationLineOn;
   DayTimeRange sunday;
   DayTimeRange monday;
   DayTimeRange tuesday;
@@ -68,6 +69,7 @@ class EnergySaveSettings {
     required this.startDayTime,
     required this.stopDayTime,
     required this.pauseMainLine,
+    required this.irrigationLineOn,
     required this.sunday,
     required this.monday,
     required this.tuesday,
@@ -83,6 +85,7 @@ class EnergySaveSettings {
       startDayTime: json['startDayTime'],
       stopDayTime: json['stopDayTime'],
       pauseMainLine: json['pauseMainLine'],
+      irrigationLineOn: json['irrigationLineOn'] ?? false,
       sunday: DayTimeRange.fromJson(json['sunday']),
       monday: DayTimeRange.fromJson(json['monday']),
       tuesday: DayTimeRange.fromJson(json['tuesday']),
@@ -99,6 +102,7 @@ class EnergySaveSettings {
       'startDayTime': startDayTime,
       'stopDayTime': stopDayTime,
       'pauseMainLine': pauseMainLine,
+      'irrigationLineOn': irrigationLineOn,
       'sunday': sunday.toJson(),
       'monday': monday.toJson(),
       'tuesday': tuesday.toJson(),
@@ -122,6 +126,7 @@ class EnergySaveSettings {
         '${friday.toMqtt()},'
         '${saturday.toMqtt()}';
   }
+
 }
 
 class DayTimeRange {

@@ -10,6 +10,7 @@ class NodeModel {
   List<RelayStatus> rlyStatus;
   List<Sensor> sensor;
   dynamic status;
+  String? lastFeedbackReceivedTime;
 
   NodeModel({
     required this.controllerId,
@@ -24,12 +25,13 @@ class NodeModel {
     required this.rlyStatus,
     required this.sensor,
     required this.status,
+    required this.lastFeedbackReceivedTime,
   });
 
   factory NodeModel.fromJson(Map<String, dynamic> json) {
     var rlyStatusList = json['RlyStatus'] as List;
     List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
-
+    bool lfKey = json.containsKey('LastFeedbackReceivedTime');
     var sensorList = json['Sensor'] as List;
     List<Sensor> sensor = sensorList.map((sensor) => Sensor.fromJson(sensor)).toList();
     return NodeModel(
@@ -45,6 +47,7 @@ class NodeModel {
       rlyStatus: rlyStatus,
       sensor: sensor,
       status: json['Status'] ?? 0,
+      lastFeedbackReceivedTime: lfKey? json['LastFeedbackReceivedTime'] ?? '0': '0',
     );
   }
 
@@ -65,7 +68,7 @@ class NodeModel {
     };
   }
 
-  NodeModel updateStatus(dynamic newStatus) {
+  NodeModel updateStatusAndRlyStatus(dynamic newStatus, dynamic newRlyStatus) {
     return NodeModel(
       controllerId: this.controllerId,
       serialNumber: this.serialNumber,
@@ -76,33 +79,54 @@ class NodeModel {
       referenceNumber: this.referenceNumber,
       slrVolt: this.slrVolt,
       batVolt: this.batVolt,
-      rlyStatus: this.rlyStatus,
+      rlyStatus: newRlyStatus,
       sensor: this.sensor,
       status: newStatus,
+      lastFeedbackReceivedTime: this.lastFeedbackReceivedTime
     );
   }
 }
 
 class Sensor {
-  final String? Name;
-  final String? Value;
+  int sNo;
+  String name;
+  String? swName;
+  int? angIpNo;
+  int? pulseIpNo;
+  String value;
+  String latLong;
 
   Sensor({
-    required this.Name,
-    required this.Value,
+    required this.sNo,
+    required this.name,
+    required this.swName,
+    required this.angIpNo,
+    required this.pulseIpNo,
+    required this.value,
+    required this.latLong,
   });
 
   factory Sensor.fromJson(Map<String, dynamic> json) {
     return Sensor(
-      Name: json['Name'],
-      Value: json['Value'],
+      sNo: json['S_No'],
+      name: json['Name'],
+      swName: json['SW_Name'],
+      angIpNo: json['AngIpNo'],
+      pulseIpNo: json['PulseIpNo'],
+      value: json['Value'],
+      latLong: json['Lat_Long'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "name": Name,
-      "value": Value
+      "sNo": sNo,
+      "name": name,
+      "swName": swName,
+      "angIpNo": angIpNo,
+      "pulseIpNo": pulseIpNo,
+      "value": value,
+      "latLong": latLong,
     };
   }
 }

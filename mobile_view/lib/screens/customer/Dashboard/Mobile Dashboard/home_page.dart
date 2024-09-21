@@ -9,6 +9,7 @@ import 'package:mobile_view/ListOfFertilizerInSet.dart';
 import 'package:mobile_view/constants/theme.dart';
 import 'package:mobile_view/screens/Customer/Planning/names_form.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/Line%20Dashboard/irrigation_line_false.dart';
+import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/current_schedule.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/next_schedule.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/schedule_program.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/sidedrawer.dart';
@@ -34,7 +35,7 @@ import 'NodeDetails/node_details.dart';
 import 'NodeDetails/node_status.dart';
 import 'Irrigation Pump Dashboard/irrigation_pump_false.dart';
 import 'Source Pump Dashboard/source_pump_false.dart';
-import 'current_schedule.dart';
+import 'dashboard_payload_handler.dart';
 
 final double speed = 100.0;
 final double gap = 100;
@@ -98,7 +99,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
   }
 
   void getData() async{
-    print('//////////////////////////////////////////get function called//////////////////////////');
+    // print('//////////////////////////////////////////get function called//////////////////////////');
     if(payloadProvider.timerForCentralFertigation != null){
       setState(() {
         payloadProvider.timerForIrrigationPump!.cancel();
@@ -182,10 +183,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
 
         }
       }catch(e,stackTrace){
-        Future.delayed(Duration.zero, () {
-          setState(() {
-            payloadProvider.httpError = true;
-          });
+        setState(() {
+          payloadProvider.httpError = true;
         });
         print(' Error getSharedUserDeviceList  => ${e.toString()}');
         print(' trace getSharedUserDeviceList  => ${stackTrace}');
@@ -426,7 +425,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       //                                       onChanged: (value) {
       //                                         stateSetter((){
       //                                           setState(() {
-      //                                             var unSubcribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
+      //                                             var unSubscribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
       //                                             payloadProvider.selectedSite = site;
       //                                             payloadProvider.selectedSiteString = value!;
       //                                             payloadProvider.selectedMaster = 0;
@@ -440,7 +439,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       //                                               payloadProvider.editLineData(selectedMasterData['irrigationLine']);
       //                                             }
       //                                             manager.unSubscribe(
-      //                                               unSubscribeTopic: unSubcribeTopic,
+      //                                               unSubscribeTopic: unSubscribeTopic,
       //                                               subscribeTopic: 'FirmwareToApp/${overAllPvd.imeiNo}',
       //                                               publishTopic: 'AppToFirmware/${overAllPvd.imeiNo}',
       //                                               publishMessage: getPublishMessage(),
@@ -473,7 +472,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       //                                               var getSharedUserDetails = await service.postRequest('getSharedUserDeviceList', {'userId' : overAllPvd.userId,"sharedUser" : payloadProvider.listOfSharedUser['users'][sharedUser]['userId']});
       //                                               stateSetter((){
       //                                                 setState((){
-      //                                                   var unSubcribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
+      //                                                   var unSubscribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
       //                                                   payloadProvider.selectedSite = sharedUser;
       //                                                   payloadProvider.selectedSiteString = value!;
       //                                                   payloadProvider.selectedMaster = 0;
@@ -500,7 +499,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       //                                                         payloadProvider.editPublishTopic('AppToFirmware/$imeiNo');
       //                                                         payloadProvider.editPublishMessage(getPublishMessage());
       //                                                         manager.unSubscribe(
-      //                                                             unSubscribeTopic: unSubcribeTopic,
+      //                                                             unSubscribeTopic: unSubscribeTopic,
       //                                                             subscribeTopic: 'FirmwareToApp/${overAllPvd.imeiNo}',
       //                                                             publishTopic: 'AppToFirmware/${overAllPvd.imeiNo}',
       //                                                             publishMessage: getPublishMessage()
@@ -630,7 +629,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       //                           : '${payloadProvider.listOfSharedUser['devices'][master]['deviceName']}\n${payloadProvider.listOfSharedUser['devices'][master]['deviceId']}')}'),
       //                       onTap: ()async{
       //                         print(payloadProvider.listOfSharedUser['devices'].length);
-      //                         var unSubcribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
+      //                         var unSubscribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
       //                         payloadProvider.selectedMaster = master;
       //                         overAllPvd.editImeiNo((!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['deviceId'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['deviceId']));
       //                         overAllPvd.editControllerType((!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['categoryId'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['categoryId']));
@@ -642,7 +641,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       //                             jsonEncode([3,4].contains(overAllPvd.controllerType)
       //                                 ? {"mC":"LD01",'cM' : selectedMaster['liveMessage']} : selectedMaster),true);
       //                         manager.unSubscribe(
-      //                             unSubscribeTopic: unSubcribeTopic,
+      //                             unSubscribeTopic: unSubscribeTopic,
       //                             subscribeTopic: 'FirmwareToApp/${overAllPvd.imeiNo}',
       //                             publishTopic: 'AppToFirmware/${overAllPvd.imeiNo}',
       //                             publishMessage: getPublishMessage()
@@ -876,7 +875,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                     IconButton(
                         onPressed: (){
                           if(overAllPvd.fromDealer) {
-                            // MQTTManager().onDisconnected();
+                            MQTTManager().onDisconnected();
                             Future.delayed(Duration.zero, () {
                               payloadProvider.clearData();
                               overAllPvd.userId = 0;
@@ -887,15 +886,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                               overAllPvd.sharedUserId = 0;
                               overAllPvd.takeSharedUserId = false;
                             });
-                            try{
-                              if (Navigator.canPop(context)) {
-                                Navigator.pop(context);
-                              }
-                            } catch(error, stackTrace) {
-                              print("error: $error");
-                              print("stackTrace: $stackTrace");
-                            }
-                            // Navigator.of(context).pop();
+                            Navigator.of(context).pop();
                           } else {
                             _scaffoldKey.currentState?.openDrawer();
                           }
@@ -934,7 +925,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                       onChanged: (value) {
                                                         stateSetter((){
                                                           setState(() {
-                                                            var unSubcribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
+                                                            var unSubscribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
                                                             payloadProvider.selectedSite = site;
                                                             payloadProvider.selectedSiteString = value!;
                                                             payloadProvider.selectedMaster = 0;
@@ -947,7 +938,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                               payloadProvider.editLineData(selectedMasterData['irrigationLine']);
                                                             }
                                                             manager.unSubscribe(
-                                                              unSubscribeTopic: unSubcribeTopic,
+                                                              unSubscribeTopic: unSubscribeTopic,
                                                               subscribeTopic: 'FirmwareToApp/${overAllPvd.imeiNo}',
                                                               publishTopic: 'AppToFirmware/${overAllPvd.imeiNo}',
                                                               publishMessage: getPublishMessage(),
@@ -979,7 +970,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                               var getSharedUserDetails = await service.postRequest('getSharedUserDeviceList', {'userId' : overAllPvd.userId,"sharedUser" : payloadProvider.listOfSharedUser['users'][sharedUser]['userId']});
                                                               stateSetter((){
                                                                 setState((){
-                                                                  var unSubcribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
+                                                                  var unSubscribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
                                                                   payloadProvider.selectedSite = sharedUser;
                                                                   payloadProvider.selectedSiteString = value!;
                                                                   payloadProvider.selectedMaster = 0;
@@ -1006,7 +997,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                                         payloadProvider.editPublishTopic('AppToFirmware/$imeiNo');
                                                                         payloadProvider.editPublishMessage(getPublishMessage());
                                                                         manager.unSubscribe(
-                                                                            unSubscribeTopic: unSubcribeTopic,
+                                                                            unSubscribeTopic: unSubscribeTopic,
                                                                             subscribeTopic: 'FirmwareToApp/${overAllPvd.imeiNo}',
                                                                             publishTopic: 'AppToFirmware/${overAllPvd.imeiNo}',
                                                                             publishMessage: getPublishMessage()
@@ -1201,8 +1192,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                 height: 30,
                                 child: Image.asset('assets/images/choose_controller.png'),
                               ),
-                              // Text('${(!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['deviceName'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['deviceName'])}\n'
-                              //     '${(!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['deviceId'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['deviceId'])}',style: TextStyle(fontSize: 12,color: Colors.white),),
                               Column(
                                 children: [
                                   SizedBox(
@@ -1231,11 +1220,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                             for(var master = 0;master < (!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'] : payloadProvider.listOfSharedUser['devices']).length;master++)
                               PopupMenuItem<int>(
                                 value: master,
-                                child: Text('${(!overAllPvd.takeSharedUserId
-                                    ? '${payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['deviceName']}\n${payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['deviceId']} ${[1,2].contains(payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['categoryId']) ? '(version : ${payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['2400'][0]['Version']})' : ''}'
-                                    : '${payloadProvider.listOfSharedUser['devices'][master]['deviceName']}\n${payloadProvider.listOfSharedUser['devices'][master]['deviceId']}')}'),
+                                child: Text(!overAllPvd.takeSharedUserId
+                                    ? '${payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['deviceName']}\n${payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['deviceId']} ${[1,2].contains(payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][master]['categoryId']) ? '(version : ${payloadProvider.version})' : ''}'
+                                    : '${payloadProvider.listOfSharedUser['devices'][master]['deviceName']}\n${payloadProvider.listOfSharedUser['devices'][master]} ${[1,2].contains(payloadProvider.listOfSharedUser['devices'][master]['categoryId']) ? '(version : ${payloadProvider.version})' : ''}'
+                                ),
                                 onTap: ()async{
-                                  var unSubcribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
+                                  var unSubscribeTopic = 'FirmwareToApp/${overAllPvd.imeiNo}';
                                   payloadProvider.selectedMaster = master;
                                   overAllPvd.editImeiNo((!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['deviceId'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['deviceId']));
                                   overAllPvd.editControllerType((!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['categoryId'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['categoryId']));
@@ -1243,15 +1233,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                   var selectedMaster = !overAllPvd.takeSharedUserId
                                       ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]
                                       : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster];
-                                  payloadProvider.updateReceivedPayload(
-                                      jsonEncode([3,4].contains(overAllPvd.controllerType)
-                                          ? {"mC":"LD01",'cM' : selectedMaster['liveMessage']} : selectedMaster),true);
                                   manager.unSubscribe(
-                                      unSubscribeTopic: unSubcribeTopic,
+                                      unSubscribeTopic: unSubscribeTopic,
                                       subscribeTopic: 'FirmwareToApp/${overAllPvd.imeiNo}',
                                       publishTopic: 'AppToFirmware/${overAllPvd.imeiNo}',
                                       publishMessage: getPublishMessage()
                                   );
+                                  payloadProvider.updateReceivedPayload(
+                                      jsonEncode([3,4].contains(overAllPvd.controllerType)
+                                          ? {"mC":"LD01",'cM' : selectedMaster['liveMessage']} : selectedMaster),true);
+
 
                                   for(var i = 0;i < 1;i++){
                                     await Future.delayed(Duration(seconds: 3));
@@ -1342,19 +1333,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                               ),
                                             ],
                                           ),
-                                          for(var i in payloadProvider.alarmList)
+                                          for(var alarm = 0;alarm < payloadProvider.alarmList.length;alarm++)
                                             ListTile(
-                                              title: Text('${getAlarmMessage[i['AlarmType']]}'),
-                                              subtitle: Text('Location : ${i['Location']}'),
+                                              title: Text('${getAlarmMessage[payloadProvider.alarmList[alarm]['AlarmType']]}'),
+                                              subtitle: Text('Location : ${payloadProvider.alarmList[alarm]['Location']}'),
                                               trailing: MaterialButton(
-                                                color: i['Status'] == 1 ? Colors.orange : Colors.red,
-                                                onPressed: () {
-                                                  String payload =  '${i['S_No']}';
-                                                  String payLoadFinal = jsonEncode({
-                                                    "4100": [{"4101": payload}]
-                                                  });
-                                                  MQTTManager().publish(payLoadFinal, payloadProvider.publishTopic);
-                                                },
+                                                color: payloadProvider.alarmList[alarm]['Status'] == 1 ? Colors.orange : Colors.red,
+                                                onPressed: DashboardPayloadHandler(manager: manager, payloadProvider: payloadProvider, overAllPvd: overAllPvd, setState: setState, context: context,index: alarm).alarmReset,
+                                                // onPressed: () {
+                                                //   String payload =  '${i['S_No']}';
+                                                //   String payLoadFinal = jsonEncode({
+                                                //     "4100": [{"4101": payload}]
+                                                //   });
+                                                //   MQTTManager().publish(payLoadFinal, payloadProvider.publishTopic);
+                                                // },
                                                 child: Text('Reset',style: TextStyle(color: Colors.white),),
                                               ),
                                             )
@@ -1418,6 +1410,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                 child: Text('Please Check Internet In Your Controller.....',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
                               ),
                             ),
+                          if(payloadProvider.powerSupply == 0)
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: Colors.deepOrange
+                              ),
+                              child: Center(
+                                child: Text('No Power To ${!overAllPvd.takeSharedUserId ? payloadProvider.listOfSite[payloadProvider.selectedSite]['master'][payloadProvider.selectedMaster]['deviceName'] : payloadProvider.listOfSharedUser['devices'][payloadProvider.selectedMaster]['deviceName']}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
+                              ),
+                            ),
                           if(![3,4].contains(overAllPvd.controllerType))
                             ListTile(
                               leading: SizedBox(
@@ -1427,60 +1431,76 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                               ),
                               subtitle: getLinePauseResumeMessage(payloadProvider.lineData[payloadProvider.selectedLine]['mode']) == '' ? null : Text('${getLinePauseResumeMessage(payloadProvider.lineData[payloadProvider.selectedLine]['mode'])}',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
                               title: Text('${payloadProvider.lineData[payloadProvider.selectedLine]['name']}',style: TextStyle(fontSize: 12,color: Colors.black),),
-                              trailing: [2,3].contains(payloadProvider.lineData[payloadProvider.selectedLine]['mode'])
-                                  ? null
-                                  : MaterialButton(
+                              trailing: [0,1].contains(payloadProvider.lineData[payloadProvider.selectedLine]['mode'])
+                                  ? MaterialButton(
                                 color: payloadProvider.lineData[payloadProvider.selectedLine]['mode'] == 0 ? Colors.orange : Colors.yellow,
-                                onPressed: ()async{
-                                  if(payloadProvider.lineData[payloadProvider.selectedLine]['pauseResumeCodeHomePage'] == null){
-                                    var lineString = '';
-                                    for(var i = 1;i < payloadProvider.lineData.length;i++){
-
-                                      if(lineString.isNotEmpty){
-                                        lineString += ';';
-                                      }
-                                      if(payloadProvider.selectedLine == 0){
-                                        lineString += '${payloadProvider.lineData[i]['sNo']},${payloadProvider.lineData[1]['mode'] == 0 ? 1 : 0}';
-                                      }else{
-                                        lineString += '${payloadProvider.lineData[i]['sNo']},${i == payloadProvider.selectedLine ? (payloadProvider.lineData[i]['mode'] == 0 ? 1 : 0) : payloadProvider.lineData[i]['mode']}';
-                                      }
-                                    }
-                                    var message = {
-                                      "4900" : [
-                                        {
-                                          "4901" : lineString
-                                        },
-                                        {
-                                          "4902" : '${overAllPvd.userId}'
-                                        },
-                                      ]
-                                    };
-                                    manager.publish(jsonEncode(message),'AppToFirmware/${overAllPvd.imeiNo}');
-                                    setState(() {
-                                      payloadProvider.lineData[payloadProvider.selectedLine]['pauseResumeCodeHomePage'] = true;
-                                      payloadProvider.messageFromHw = '';
-                                    });
-                                    for(var seconds = 0;seconds < 8;seconds++){
-                                      await Future.delayed(Duration(seconds: 1));
-                                      if(payloadProvider.messageFromHw != ''){
-                                        setState(() {
-                                          payloadProvider.lineData[payloadProvider.selectedLine].remove('pauseResumeCodeHomePage');
-                                        });
-                                        stayAlert(context: context, payloadProvider: payloadProvider,message: 'Hardware recieved successfully');
-                                        break;
-                                      }
-                                      if(seconds == 7){
-                                        setState(() {
-                                          payloadProvider.lineData[payloadProvider.selectedLine].remove('pauseResumeCodeHomePage');
-                                        });
-                                      }
-                                    }
-                                  }
-                                },
-                                child: payloadProvider.lineData[payloadProvider.selectedLine]['pauseResumeCodeHomePage'] == null
+                                onPressed: DashboardPayloadHandler(manager: manager, payloadProvider: payloadProvider, overAllPvd: overAllPvd, setState: setState, context: context).irrigationLinePauseResume,
+                                // onPressed: ()async{
+                                //   if(payloadProvider.lineData[payloadProvider.selectedLine]['pauseResumeCodeHomePage'] == null){
+                                //     var lineString = '';
+                                //     for(var i = 1;i < payloadProvider.lineData.length;i++){
+                                //
+                                //       if(lineString.isNotEmpty){
+                                //         lineString += ';';
+                                //       }
+                                //       if(payloadProvider.selectedLine == 0){
+                                //         lineString += '${payloadProvider.lineData[i]['sNo']},${payloadProvider.lineData[1]['mode'] == 0 ? 1 : 0}';
+                                //       }else{
+                                //         lineString += '${payloadProvider.lineData[i]['sNo']},${i == payloadProvider.selectedLine ? (payloadProvider.lineData[i]['mode'] == 0 ? 1 : 0) : payloadProvider.lineData[i]['mode']}';
+                                //       }
+                                //     }
+                                //     var message = {
+                                //       "4900" : [
+                                //         {
+                                //           "4901" : lineString
+                                //         },
+                                //         {
+                                //           "4902" : '${overAllPvd.userId}'
+                                //         },
+                                //       ]
+                                //     };
+                                //     manager.publish(jsonEncode(message),'AppToFirmware/${overAllPvd.imeiNo}');
+                                //     try {
+                                //       var data = {
+                                //         "userId": overAllPvd.getUserId(),
+                                //         "controllerId": overAllPvd.controllerId,
+                                //         "data": message,
+                                //         "hardware" : message,
+                                //         "messageStatus": "${payloadProvider.lineData[payloadProvider.selectedLine]['name']} ${payloadProvider.lineData[payloadProvider.selectedLine]['mode'] == 0 ? 'Resume' : 'Pause'}",
+                                //         "createUser": overAllPvd.getUserId()
+                                //       };
+                                //       final response = await HttpService().postRequest("createUserManualOperationInDashboard", data);
+                                //       if (response.statusCode == 200) {
+                                //         final jsonResponse = json.decode(response.body);
+                                //       }
+                                //     } catch (e) {
+                                //       print('Error: $e');
+                                //     }
+                                //     setState(() {
+                                //       payloadProvider.lineData[payloadProvider.selectedLine]['pauseResumeCodeHomePage'] = true;
+                                //       payloadProvider.messageFromHw = '';
+                                //     });
+                                //     for(var seconds = 0;seconds < 8;seconds++){
+                                //       await Future.delayed(Duration(seconds: 1));
+                                //       if(payloadProvider.messageFromHw != ''){
+                                //         setState(() {
+                                //           payloadProvider.lineData[payloadProvider.selectedLine].remove('pauseResumeCodeHomePage');
+                                //         });
+                                //         stayAlert(context: context, payloadProvider: payloadProvider,message: 'Hardware recieved successfully');
+                                //         break;
+                                //       }
+                                //       if(seconds == 7){
+                                //         setState(() {
+                                //           payloadProvider.lineData[payloadProvider.selectedLine].remove('pauseResumeCodeHomePage');
+                                //         });
+                                //       }
+                                //     }
+                                //   }
+                                // },
+                                child: payloadProvider.lineData[payloadProvider.selectedLine]['loading'] == null
                                     ?  Text(payloadProvider.lineData[payloadProvider.selectedLine]['mode'] == 0 ? 'Pause' : 'Resume',style: TextStyle(color: payloadProvider.lineData[payloadProvider.selectedLine]['mode'] == 0 ? Colors.white : Colors.black),)
                                     : loadingButton(),
-                              ),
+                              ) : null,
                             ),
                           if([3,4].contains(overAllPvd.controllerType))
                             PumpControllerDashboard(userId: overAllPvd.takeSharedUserId ? overAllPvd.sharedUserId : userId, deviceId: overAllPvd.imeiNo, controllerId: overAllPvd.controllerId, selectedSite: payloadProvider.selectedSite, selectedMaster: payloadProvider.selectedMaster,)
@@ -1633,7 +1653,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                             if(selectedTab == 0)
                               CurrentScheduleForMobile(manager: manager, deviceId: '${overAllPvd.imeiNo}',),
                             if(selectedTab == 1)
-                              NextScheduleForMobile(selectedLine: payloadProvider.selectedLine,),
+                              NextScheduleForMobile(),
                             if(selectedTab == 2)
                               ScheduleProgramForMobile(manager: manager, deviceId: '${overAllPvd.imeiNo}', selectedLine: payloadProvider.selectedLine, userId: overAllPvd.userId, controllerId: overAllPvd.controllerId,),
                           ],
@@ -1973,38 +1993,5 @@ class FilterPaint extends CustomPainter{
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
-  }
-}
-
-abstract class hardwareConnection {
-  String macAddress;
-  hardwareConnection(this.macAddress);
-  void nodeConnection();
-  void ReferenceNoConnection();
-  void outputConnection();
-  void inputConnection();
-  void editMacAddress(String macValue){
-    macAddress = macValue;
-  }
-}
-
-class rtuNode extends hardwareConnection{
-  String macAddress;
-  rtuNode(this.macAddress) : super('');
-  @override
-  void nodeConnection(){
-    print('The is node name');
-  }
-  @override
-  void ReferenceNoConnection(){
-    print("The is node's reference number");
-  }
-  @override
-  void outputConnection(){
-    print("The is node's reference number");
-  }
-  @override
-  void inputConnection(){
-    print("The is node's input number");
   }
 }

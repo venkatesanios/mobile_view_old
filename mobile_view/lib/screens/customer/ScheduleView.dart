@@ -43,7 +43,7 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> with TickerProv
   late OverAllUse overAllPvd;
   bool isToday = false;
   HttpService httpService = HttpService();
-  DateTime selectedDate = DateTime.now();
+  // DateTime selectedDate = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   String message = "";
   CalendarFormat _calendarFormat = CalendarFormat.week;
@@ -87,7 +87,7 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> with TickerProv
   @override
   Widget build(BuildContext context) {
     scheduleViewProvider = Provider.of<ScheduleViewProvider>(context, listen: true);
-    scheduleDateWithoutTime = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    scheduleDateWithoutTime = DateTime(scheduleViewProvider.date.year, scheduleViewProvider.date.month, scheduleViewProvider.date.day);
     final screenSize = MediaQuery.of(context).size.width;
     return Scaffold(
       body: RefreshIndicator(
@@ -119,11 +119,11 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> with TickerProv
                   ),
                 ),
                 selectedDayPredicate: (day) {
-                  return isSameDay(selectedDate, day);
+                  return isSameDay(scheduleViewProvider.date, day);
                 },
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
-                    selectedDate = selectedDay;
+                    scheduleViewProvider.date = selectedDay;
                     _focusedDay = focusedDay;
                   });
                   scheduleViewProvider.fetchData(overAllPvd.imeiNo, overAllPvd.userId, overAllPvd.controllerId, context);
@@ -482,13 +482,6 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> with TickerProv
         ),
         onPressed: scheduleViewProvider.scheduleGotFromMqtt ? () async {
           // var
-          var userData = {
-            "userId": overAllPvd.userId,
-            "controllerId": overAllPvd.controllerId,
-            "modifyUser": overAllPvd.customerId,
-            "sequence": scheduleViewProvider.convertedList,
-            "scheduleDate": DateFormat('yyyy-MM-dd').format(scheduleViewProvider.date)
-          };
           var listToMqtt = [];
           for (var i = 0; i < scheduleViewProvider.convertedList.length; i++) {
             String scheduleMap = ""
@@ -513,6 +506,14 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> with TickerProv
             "2700": [{
               "2701": "${listToMqtt.join(";").toString()};"
             }]
+          };
+          var userData = {
+            "userId": overAllPvd.userId,
+            "controllerId": overAllPvd.controllerId,
+            "modifyUser": overAllPvd.customerId,
+            "sequence": scheduleViewProvider.convertedList,
+            "scheduleDate": DateFormat('yyyy-MM-dd').format(scheduleViewProvider.date),
+            "hardware": dataToHardware
           };
           try {
             var mqttPayloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
@@ -1248,7 +1249,7 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> with TickerProv
                     borderRadius: BorderRadius.zero,
                   ),
                   height: double.infinity,
-                  width: constraints.maxWidth,
+                  // width: constraints.maxWidth,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

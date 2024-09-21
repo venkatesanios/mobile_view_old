@@ -146,7 +146,7 @@ Future<void>showNodeDetailsBottomSheet({required BuildContext context}) async{
                                           payloadProvider.nodeData[i].rlyStatus[index].name!.contains("MV") ?
                                           Image.asset('assets/images/m_valve.png'):
                                           payloadProvider.nodeData[i].rlyStatus[index].name!.contains("FL") ?
-                                          Image.asset('assets/images/filter_png.png'):
+                                          Image.asset('assets/images/central_filtration_site.png'):
                                           payloadProvider.nodeData[i].rlyStatus[index].name!.contains("FC") ?
                                           Image.asset('assets/images/channel.png'):
                                           payloadProvider.nodeData[i].rlyStatus[index].name!.contains("FG") ?
@@ -202,7 +202,7 @@ Future<void>showNodeDetailsBottomSheet({required BuildContext context}) async{
                                             height: 45,
                                             child: Stack(
                                               children: [
-                                                AppImages.getAsset('sensor',0, payloadProvider.nodeData[i].sensor[index].Name!),
+                                                AppImages.getAsset('sensor',0, payloadProvider.nodeData[i].sensor[index].name!),
                                                 Positioned(
                                                   top: 30,
                                                   left: 0,
@@ -211,7 +211,7 @@ Future<void>showNodeDetailsBottomSheet({required BuildContext context}) async{
                                                         borderRadius: BorderRadius.circular(3),
                                                         color: Colors.yellow,
                                                       ),
-                                                      child: Center(child: Text('${payloadProvider.nodeData[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                                      child: Center(child: Text('${payloadProvider.nodeData[i].sensor[index].value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                                   ),
                                                 ),
                                               ],
@@ -220,7 +220,7 @@ Future<void>showNodeDetailsBottomSheet({required BuildContext context}) async{
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              Text(payloadProvider.nodeData[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                              Text(payloadProvider.nodeData[i].sensor[index].name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                             ],
                                           ),
                                         ],

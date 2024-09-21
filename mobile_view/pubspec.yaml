@@ -65,6 +65,7 @@ dependencies:
   data_table_2: ^2.5.12
   material_design_icons_flutter: ^7.0.7296
   firebase_core: ^3.3.0
+  flutter_json_view: ^1.1.5
 
 
 dev_dependencies:
@@ -122,6 +123,7 @@ dev_dependencies:
   archive: ^3.6.1
   upgrader: ^10.3.0
   flutter_screenutil: ^5.9.3
+
 
 
 

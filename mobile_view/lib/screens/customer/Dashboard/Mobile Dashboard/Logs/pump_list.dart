@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_view/screens/Customer/Dashboard/PumpControllerScreens/pump_controller_dashboard.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/Logs/pump_log.dart';
+import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/Logs/voltage_log.dart';
 
 import 'hourly_data.dart';
 
@@ -48,6 +49,12 @@ class _PumpListState extends State<PumpList> {
                                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => NewPumpLogScreen(userId: 12, controllerId: 39, nodeControllerId: pumpItem['controllerId'],)));
                               },
                               icon: Icon(Icons.auto_graph)
+                          ),
+                          IconButton(
+                              onPressed: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PumpVoltageLogScreen(userId: 12, controllerId: 39, nodeControllerId: pumpItem['controllerId'],)));
+                              },
+                              icon: Icon(Icons.electric_bolt)
                           ),
                         ],
                       ),

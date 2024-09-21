@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mobile_view/screens/UserChat/user_chat.dart';
+import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/ControllerSettings.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/sub_user.dart';
 import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/verssionupdate.dart';
 import 'package:mobile_view/screens/customer/SentAndReceived/sent_and_received.dart';
@@ -173,18 +175,29 @@ class _DrawerWidgetState extends State<DrawerWidget> {
               // Navigate to help screen or perform related action.
             },
           ),
-          // ListTile(
-          //   leading: Icon(Icons.feedback),
-          //   title: Text('Send Feedback'),
-          //   onTap: () {
-          //     // Navigate to send feedback screen or perform related action.
-          //   },
-          // ),
+          ListTile(
+            leading: Icon(Icons.feedback),
+            title: Text('Help and Support'),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => UserChatScreen(userId: overAllPvd.userId, dealerId: 0, userName: uName,)));
+              // Navigate to send feedback screen or perform related action.
+            },
+          ),
           ListTile(
             leading: Icon(Icons.info),
             title: Text('Controller Info'),
             onTap: () => _showPasswordDialog(context),
 
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('Settings'),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context){
+                return ControllerSettings();
+              }));
+              // Navigate to help screen or perform related action.
+            },
           ),
           ListTile(
             leading: Icon(Icons.logout),

@@ -160,6 +160,34 @@ class PreferenceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateControllerReaStatus({required String key, required int oroPumpIndex}) {
+    if(key.contains("100")) commonPumpSettings![oroPumpIndex].settingList[0].controllerReadStatus = "1";
+    if(key.contains("200")) commonPumpSettings![oroPumpIndex].settingList[1].controllerReadStatus = "1";
+    int pumpIndex = 0;
+    for (var individualPump in individualPumpSetting ?? []) {
+      if (commonPumpSettings![oroPumpIndex].deviceId == individualPump.deviceId) {
+        pumpIndex++;
+        for (var individualPumpSetting in individualPump.settingList) {
+          switch (individualPumpSetting.type) {
+            case 23:
+              if(key.contains("400-$pumpIndex")) individualPumpSetting.controllerReadStatus= "1";
+              break;
+            case 22:
+              if(key.contains("300-$pumpIndex") || key.contains("500-$pumpIndex")) individualPumpSetting.controllerReadStatus = "1";
+              break;
+            case 25:
+              if(key.contains("600-$pumpIndex")) individualPumpSetting.controllerReadStatus = "1";
+              break;
+          }
+        }
+      }
+    }
+    if(passwordValidationCode == 200 && calibrationSetting!.isNotEmpty) {
+      if(key.contains("900")) calibrationSetting![oroPumpIndex].settingList[1].controllerReadStatus = "1";
+    }
+    notifyListeners();
+  }
+
   void clearData() {
     notReceivingAck = false;
     sending = false;

@@ -94,7 +94,7 @@ class _RadiationSetUIState extends State<RadiationSetUI>
       return DefaultTabController(
         length: _radiationSet.data!.length,
           child: Scaffold(backgroundColor: Color(0xffE6EDF5),
-            appBar: AppBar(title: Text('Radiation Set'),),
+            appBar: AppBar(title: Text('Radiation Set'),automaticallyImplyLeading: false,),
            body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -976,6 +976,7 @@ class _RadiationSetUIState extends State<RadiationSetUI>
       "userId": overAllPvd.userId,
       "controllerId": overAllPvd.controllerId,
       "radiationSet": radiationSet,
+       "hardware": payLoadFinal,
       "createUser": overAllPvd.userId
     };
 

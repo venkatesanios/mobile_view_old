@@ -987,9 +987,7 @@ class _WaterAndFertilizerScreenState extends State<WaterAndFertilizerScreen> {
                                                   child: TextFormField(
                                                     controller: programPvd.ec,
                                                     maxLength: 3,
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                                                    ],
+                                                    inputFormatters: regexForDecimal,
                                                     textAlign: TextAlign.center,
                                                     style: const TextStyle(fontSize: 14),
                                                     decoration: const InputDecoration(
@@ -1040,9 +1038,7 @@ class _WaterAndFertilizerScreenState extends State<WaterAndFertilizerScreen> {
                                                   child: TextFormField(
                                                     controller: programPvd.ph,
                                                     maxLength: 6,
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                                                    ],
+                                                    inputFormatters: regexForDecimal,
                                                     textAlign: TextAlign.center,
                                                     style: const TextStyle(fontSize: 14),
                                                     decoration: const InputDecoration(

@@ -10,6 +10,7 @@ import '../../../../constants/MQTTManager.dart';
 import '../../../../state_management/MqttPayloadProvider.dart';
 import '../../../../state_management/overall_use.dart';
 import '../../Planning/NewIrrigationProgram/irrigation_program_main.dart';
+import 'dashboard_payload_handler.dart';
 import 'home_page.dart';
 import 'mobile_dashboard_common_files.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -32,6 +33,8 @@ class _ScheduleProgramForMobileState extends State<ScheduleProgramForMobile> {
   @override
   Widget build(BuildContext context) {
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: true);
+    var overAllPvd = Provider.of<OverAllUse>(context,listen: false);
+
     return  Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -204,40 +207,40 @@ class _ScheduleProgramForMobileState extends State<ScheduleProgramForMobile> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             InkWell(
-                              onTap:()async{
-                                if(int.parse(program['ProgOnOff']) >= 0){
-                                  if(program['startStopCode'] == null){
-                                    String payload = '${program['SNo']},${program['ProgOnOff']}';
-                                    String payLoadFinal = jsonEncode({
-                                      "2900": [{"2901": payload}]
-                                    });
-                                    widget.manager.publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                    sentUserOperationToServer('${program['ProgName']} ${program['ProgOnOff'] != 0 ? 'Started' : 'Stoped'} by Manual', payLoadFinal,context);
-                                    setState(() {
-                                      program['startStopCode'] = true;
-                                      payloadProvider.messageFromHw = '';
-                                    });
-                                    for(var seconds = 0;seconds < 8;seconds++){
-                                      await Future.delayed(Duration(seconds: 1));
-                                      if(payloadProvider.messageFromHw != ''){
-                                        stayAlert(context: context, payloadProvider: payloadProvider, message: 'Hardware recieved successfully');
-                                        break;
-                                      }
-                                      if(seconds == 7){
-                                        setState(() {
-                                          program.remove('startStopCode');
-                                        });
-                                      }
-                                    }
-                                    Future.delayed(Duration(seconds: 8),(){
-                                      setState(() {
-                                        program.remove('startStopCode');
-                                      });
-                                    });
-                                  }
-                                }
-
-                              },
+                              onTap: DashboardPayloadHandler(manager: widget.manager, payloadProvider: payloadProvider, overAllPvd: overAllPvd, setState: setState, context: context,index: payloadProvider.upcomingProgram.indexOf(program)).programStartStop,
+                              // onTap:()async{
+                              //   if(int.parse(program['ProgOnOff']) >= 0){
+                              //     if(program['startStopCode'] == null){
+                              //       String payload = '${program['SNo']},${program['ProgOnOff']}';
+                              //       String payLoadFinal = jsonEncode({
+                              //         "2900": [{"2901": payload}]
+                              //       });
+                              //       widget.manager.publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                              //       sentUserOperationToServer('${program['ProgName']} ${programOnOff[program['ProgOnOff']]}', payLoadFinal,context);
+                              //       setState(() {
+                              //         program['startStopCode'] = true;
+                              //         payloadProvider.messageFromHw = '';
+                              //       });
+                              //       for(var seconds = 0;seconds < 8;seconds++){
+                              //         await Future.delayed(Duration(seconds: 1));
+                              //         if(payloadProvider.messageFromHw != ''){
+                              //           stayAlert(context: context, payloadProvider: payloadProvider, message: 'Hardware recieved successfully');
+                              //           break;
+                              //         }
+                              //         if(seconds == 7){
+                              //           setState(() {
+                              //             program.remove('startStopCode');
+                              //           });
+                              //         }
+                              //       }
+                              //       Future.delayed(Duration(seconds: 8),(){
+                              //         setState(() {
+                              //           program.remove('startStopCode');
+                              //         });
+                              //       });
+                              //     }
+                              //   }
+                              // },
                               child: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
                                 decoration: BoxDecoration(
@@ -251,33 +254,33 @@ class _ScheduleProgramForMobileState extends State<ScheduleProgramForMobile> {
                             ),
                             SizedBox(width: 10,),
                             InkWell(
-                              onTap:()async{
-                                if(program['pauseResumeCode'] == null){
-                                  String payload = '${program['SNo']},${program['ProgPauseResume']}';
-                                  String payLoadFinal = jsonEncode({
-                                    "2900": [{"2901": payload}]
-                                  });
-                                  widget.manager.publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                  sentUserOperationToServer('${program['ProgName']} ${program['ProgPauseResume'] != 1 ? 'Pause' : 'Resume'} by Manual', payLoadFinal,context);
-
-                                }
-                                setState(() {
-                                  program['pauseResumeCode'] = true;
-                                  payloadProvider.messageFromHw = '';
-                                });
-                                for(var seconds = 0;seconds < 8;seconds++){
-                                  await Future.delayed(Duration(seconds: 1));
-                                  if(payloadProvider.messageFromHw != ''){
-                                    stayAlert(context: context, payloadProvider: payloadProvider,message: 'Hardware recieved successfully');
-                                    break;
-                                  }
-                                  if(seconds == 7){
-                                    setState(() {
-                                      program.remove('pauseResumeCode');
-                                    });
-                                  }
-                                }
-                              },
+                              onTap: DashboardPayloadHandler(manager: widget.manager, payloadProvider: payloadProvider, overAllPvd: overAllPvd, setState: setState, context: context,index: payloadProvider.upcomingProgram.indexOf(program)).programPauseResume,
+                              // onTap:()async{
+                              //   if(program['pauseResumeCode'] == null){
+                              //     String payload = '${program['SNo']},${program['ProgPauseResume']}';
+                              //     String payLoadFinal = jsonEncode({
+                              //       "2900": [{"2901": payload}]
+                              //     });
+                              //     widget.manager.publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                              //     sentUserOperationToServer('${program['ProgName']} ${program['ProgPauseResume'] != '1' ? 'Pause' : 'Resume'} by Manual', payLoadFinal,context);
+                              //   }
+                              //   setState(() {
+                              //     program['pauseResumeCode'] = true;
+                              //     payloadProvider.messageFromHw = '';
+                              //   });
+                              //   for(var seconds = 0;seconds < 8;seconds++){
+                              //     await Future.delayed(Duration(seconds: 1));
+                              //     if(payloadProvider.messageFromHw != ''){
+                              //       stayAlert(context: context, payloadProvider: payloadProvider,message: 'Hardware recieved successfully');
+                              //       break;
+                              //     }
+                              //     if(seconds == 7){
+                              //       setState(() {
+                              //         program.remove('pauseResumeCode');
+                              //       });
+                              //     }
+                              //   }
+                              // },
                               child: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
                                 decoration: BoxDecoration(

@@ -133,7 +133,7 @@ class _CustomMarkerPageState extends State<CustomMarkerPage> {
     {
       markIconsValve = await getImages(images[7], 50);
     }  // if(mounted) {
-    setState(() {
+    setState(() async{
       for (int i = 0; i < mapPvd.siteData.data!.length; i++) {
         String coordinatestr = mapPvd.siteData.data![0].geography!.latLong!;
         // coordinatestr = "11.1385415-76.9861059";
@@ -357,7 +357,7 @@ class _CustomMarkerPageState extends State<CustomMarkerPage> {
                 ? BitmapDescriptor.fromBytes(markIconsCtrl)
                 : type[i] == 2
                 ? BitmapDescriptor.fromBytes(markIconsNode)
-                : BitmapDescriptor.fromBytes(markIconsValve),
+                :  BitmapDescriptor.fromBytes(await getImages(getmarkerimages(status[i]), 50)) ,
             position: latLen[i],
             infoWindow: InfoWindow(
               title: '${name[i]}',
@@ -374,70 +374,65 @@ class _CustomMarkerPageState extends State<CustomMarkerPage> {
     });
   }
 
-  Future<BitmapDescriptor> getmarkerimages(String status) async {
-    if (status == 0) {
-      var byteValve = await getImages('assets/weather/markerred.png', 50);
-      return BitmapDescriptor.fromBytes(byteValve);
-    } else if (status == 1) {
-      var byteValve = await getImages('assets/weather/markerorange.png', 50);
-      return BitmapDescriptor.fromBytes(byteValve);
-    } else if (status == 2) {
-      var byteValve = await getImages('assets/weather/markergray.png', 50);
-      return BitmapDescriptor.fromBytes(byteValve);
-    } else if (status == 3) {
-      var byteValve = await getImages('assets/weather/markergray.png', 50);
-      return BitmapDescriptor.fromBytes(byteValve);
+  String getmarkerimages(String status)  {
+    if (status == "0") {
+      return 'assets/weather/markerred.png';
+    } else if (status == "1") {
+      return 'assets/weather/markergreen.png';
+    } else if (status == "2") {
+      return 'assets/weather/markergreen.png';
+    } else if (status == "3") {
+      return 'assets/weather/markergray.png';
     } else {
-      var byteValve = await getImages('assets/weather/markergray.png', 50);
-      return BitmapDescriptor.fromBytes(byteValve);
+      return 'assets/weather/markergray.png';
     }
   }
 
   String getbottomimages(int type, String status, String model) {
     if (type == 1) {
-      if (status == 0) {
+      if (status == "0") {
         return 'assets/weather/oro_gem.png';
-      } else if (status == 1) {
+      } else if (status == "1") {
         return 'assets/weather/oro_gem.png';
-      } else if (status == 2) {
+      } else if (status == "2") {
         return 'assets/weather/oro_gem.png';
-      } else if (status == 3) {
+      } else if (status == "3") {
         return 'assets/weather/oro_gem.png';
       } else {
         return 'assets/weather/oro_gem.png';
       }
     } else if (type == 2) {
-      if (status == 0) {
+      if (status == "0") {
         return 'assets/images/oro_rtu.png';
-      } else if (status == 1) {
+      } else if (status == "1") {
         return 'assets/images/oro_rtu.png';
-      } else if (status == 2) {
+      } else if (status == "2") {
         return 'assets/images/oro_rtu.png';
-      } else if (status == 3) {
+      } else if (status == "3") {
         return 'assets/images/oro_rtu.png';
       } else {
         return 'assets/images/oro_rtu.png';
       }
     } else if (type == 3) {
-      if (status == 0) {
+      if (status == "0") {
         return 'assets/images/valve_red.png';
-      } else if (status == 1) {
+      } else if (status == "1") {
         return 'assets/images/valve_green.png';
-      } else if (status == 2) {
+      } else if (status == "2") {
         return 'assets/images/valve_orange.png';
-      } else if (status == 3) {
+      } else if (status == "3") {
         return 'assets/images/valve_gray.png';
       } else {
         return 'assets/images/valve_gray.png';
       }
     } else if (type == 4) {
-      if (status == 0) {
+      if (status == "0") {
         return 'assets/weather/soilmoisture-1.png';
-      } else if (status == 1) {
+      } else if (status == "1") {
         return 'assets/weather/soilmoisture-1.png';
-      } else if (status == 2) {
+      } else if (status == "2") {
         return 'assets/weather/soilmoisture-1.png';
-      } else if (status == 3) {
+      } else if (status == "3") {
         return 'assets/weather/soilmoisture-1.png';
       } else {
         return 'assets/weather/soilmoisture-1.png';

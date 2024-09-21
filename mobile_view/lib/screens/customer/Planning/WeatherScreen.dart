@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_view/Models/Customer/node_model.dart';
+import 'package:mobile_view/screens/customer/Dashboard/Mobile%20Dashboard/Fertilizer%20Dashboard/fertilizer_widget.dart';
 import 'package:mobile_view/screens/customer/Planning/additionalinformation.dart';
 import 'package:mobile_view/screens/customer/Planning/weather_report.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +17,7 @@ import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 import '../../../state_management/overall_use.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
+// import 'package:pretty_gauge/pretty_gauge.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen(
@@ -295,7 +299,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               ),
                               const SizedBox(
                                 height: 10,
-                                width: 20,
+                                width: 30,
                               ),
                               Column(
                                 children: [
@@ -313,7 +317,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                         color: Colors.black54,
-                                       ),
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(2.0, 2.0),
+                                            blurRadius: 3.0,
+                                            color: Colors.grey
+                                                .withOpacity(0.5),
+                                          ),
+                                        ]),
                                   ),
                                   const SizedBox(
                                     height: 15,
@@ -384,7 +395,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         padding: EdgeInsets.all(2.0),
                         child: Text(
                           "Last SyncTime : ${_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].time} ",
-                          //  ${_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].date
+                          //  ${_mqttPayloadProvider.weatherModel instance.data![0].WeatherSensor list![i].date
                           style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -496,17 +507,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                               value:
                                               '${cardValues(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index], i)} ${cardValuesunits(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index])}',
                                               Max:
-                                              '${MaxValues(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index], i)}${cardValuesunits(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index])}/${MaxTimeValues(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index], i)}PM',
-                                              Min:
-                                              '${MinValues(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index], i)}${cardValuesunits(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index])}/${MaxTimeValues(_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![i].sensorlist[index], i)}PM',
-                                            ),
+                                              '00/00',
+                                              Min:"00/00"
+                                                  ""),
                                             Container(
                                               height: 140,
                                               margin: EdgeInsets.fromLTRB(
-                                                  10, 0, 25, 5.0),
+                                                  5, 0, 5, 5.0),
                                               child: SizedBox(
-                                                height: 80,
-                                                width: 65,
+                                                height: 120,
+                                                width: 80,
                                                 child: '${_mqttPayloadProvider.weatherModelinstance.data![0].WeatherSensorlist![0].sensorlist[index]}' !=
                                                     'WindDirection'
                                                     ? animatedGaugeWidget(
@@ -526,23 +536,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                                         0]
                                                             .sensorlist[index],
                                                         i))
-                                                    : Text(
-                                                  degreeToDirection(cardValues(
-                                                      _mqttPayloadProvider
-                                                          .weatherModelinstance
-                                                          .data![0]
-                                                          .WeatherSensorlist![
-                                                      0]
-                                                          .sensorlist[index],
-                                                      i)),
-                                                  style: TextStyle(
-                                                      color: Colors
-                                                          .black,
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                      FontWeight
-                                                          .bold),
-                                                ),
+                                                    : SizedBox(),
                                               ),
                                             ),
                                           ],
@@ -551,19 +545,26 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                       _mqttPayloadProvider
                                           .weatherModelinstance
                                           .data![0]
-                                          .WeatherSensorlist![
-                                      0]
-                                          .sensorlist[
-                                      index] == 'WindDirection' ? SizedBox(): SizedBox(
-                                        height: 37,
+                                          .WeatherSensorlist![0]
+                                          .sensorlist[index] ==
+                                          "WindDirection"
+                                          ? SizedBox()
+                                          : SizedBox(
+                                        height: 55,
                                         child: Padding(
-                                          padding: EdgeInsets.fromLTRB(
-                                              180, 5.0, 0, 5.0),
+                                          padding:
+                                          EdgeInsets.fromLTRB(
+                                              200,
+                                              0.0,
+                                              0,
+                                              27.0),
                                           child: Container(
-                                            decoration: BoxDecoration(
+                                            decoration:
+                                            BoxDecoration(
                                               borderRadius:
-                                              BorderRadius.circular(
-                                                8.0,
+                                              BorderRadius
+                                                  .circular(
+                                                10.0,
                                               ),
                                               color: getValueColor(
                                                   cardValues(
@@ -583,25 +584,29 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                                       .sensorlist[index])),
                                               boxShadow: [
                                                 BoxShadow(
-                                                    color: Colors.grey,
-                                                    spreadRadius: 0.2,
+                                                    color:
+                                                    Colors.grey,
+                                                    spreadRadius:
+                                                    0.2,
                                                     blurRadius: 0.2,
                                                     blurStyle:
-                                                    BlurStyle.outer,
-                                                    offset:
-                                                    Offset.infinite),
+                                                    BlurStyle
+                                                        .outer,
+                                                    offset: Offset
+                                                        .infinite),
                                               ],
                                             ),
                                             child: Padding(
-                                              padding:
-                                              EdgeInsets.fromLTRB(
-                                                  15, 3.0, 15, 5.0),
+                                              padding: EdgeInsets
+                                                  .fromLTRB(15, 3.0,
+                                                  15, 5.0),
                                               child: Text(
                                                 GetTextStaus(
                                                     cardValues(
                                                         _mqttPayloadProvider
                                                             .weatherModelinstance
-                                                            .data![0]
+                                                            .data![
+                                                        0]
                                                             .WeatherSensorlist![
                                                         0]
                                                             .sensorlist[
@@ -616,16 +621,23 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight:
-                                                  FontWeight.bold,
-                                                  color: Colors.white,
-                                                  letterSpacing: 1.2,
+                                                  FontWeight
+                                                      .bold,
+                                                  color:
+                                                  Colors.white,
+                                                  letterSpacing:
+                                                  1.2,
                                                   height: 0.0,
                                                   shadows: [
                                                     Shadow(
-                                                      offset: Offset(
-                                                          0.1, 0.0),
-                                                      color: Colors.grey,
-                                                      blurRadius: 0.5,
+                                                      offset:
+                                                      Offset(
+                                                          0.1,
+                                                          0.0),
+                                                      color: Colors
+                                                          .grey,
+                                                      blurRadius:
+                                                      0.5,
                                                     ),
                                                   ],
                                                 ),
@@ -688,7 +700,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         min: min,
         degrees: 250,
         style: const GaugeAxisStyle(
-          thickness: 8,
+          thickness: 10,
         ),
         pointer: GaugePointer.triangle(
             width: 10,
@@ -791,31 +803,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
       if (value > 3 && value < 7) return "Normal";
       return "Bright";
     } else if (title == 'WindDirection') {
-      if ((value >= 337.5 && value <= 360) || (value >= 0.0 && value < 22.5)) {
-        return 'North';
-      } else if (value >= 22.5 && value < 67.5) {
-        return 'NorthEast';
-      } else if (value >= 67.5 && value < 112.5) {
-        return 'East';
-      } else if (value >= 112.5 && value < 157.5) {
-        return 'SouthEast';
-      } else if (value >= 157.5 && value < 202.5) {
-        return 'South';
-      } else if (value >= 202.5 && value < 247.5) {
-        return 'SouthWest';
-      } else if (value >= 247.5 && value < 292.5) {
-        return 'West';
-      } else if (value >= 292.5 && value < 337.5) {
-        return 'NorthWest';
-      } else {
-        return "error";
-      }
+      return 'eeee';
     } else if (title == 'Rainfall') {
       if (value < 20) return "Low";
       if (value > 20 && value < 80) return "Medium";
       return "High";
     } else if (title == 'WindSpeed') {
-      if (value < 30) return "Calm";
+      if (value < 30) return "calm";
       if (value > 30 && value < 70) return "Breezy";
       return "Gusty";
     } else {
@@ -850,7 +844,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     } else if (title == 'Lux') {
       imageAsserStr = 'assets/images1/Lux.png';
     } else if (title == 'WindDirection') {
-      imageAsserStr = 'assets/images1/WindDirection.png';
+      imageAsserStr = 'assets/images1/windDirection.png';
     } else if (title == 'Rainfall') {
       imageAsserStr = 'assets/images1/rainFall.png';
     } else if (title == 'WindSpeed') {
